@@ -1,0 +1,14 @@
+{
+  "presets": [
+    [ 
+      "@babel/preset-env",
+      { 
+        "exclude": [
+          "@babel/plugin-transform-template-literals"
+        ]
+      }
+    ],
+    "@babel/preset-react"
+  ]
+}
+
