@@ -22,6 +22,8 @@
   "dependencies": {
     "classnames": "^2.2.6",
     "content-store": "github:arso-project/content-store#master",
+    "duplexify": "^4.1.1",
+    "end-of-stream": "^1.4.1",
     "fastify": "^2.7.0",
     "fastify-static": "^2.5.0",
     "fastify-websocket": "^0.6.0",

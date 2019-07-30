@@ -4,10 +4,10 @@ const mkdirp = require('mkdirp')
 const p = require('path')
 
 module.exports = {
-  makestore
+  makeStore
 }
 
-function makestore (basePath) {
+function makeStore (basePath) {
   const paths = {
     level: p.join(basePath, 'level'),
     corestore: p.join(basePath, 'corestore'),
