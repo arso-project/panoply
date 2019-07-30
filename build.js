@@ -1,11 +1,20 @@
 const fs = require('fs')
+const p = require('path')
 const browserify = require('browserify')
 const documentify = require('documentify')
 const hyperstream = require('hstream')
+const mkdirp = require('mkdirp')
 
-const entry = './frontend/index.js'
-const outfile = './build/bundle.js'
-const outfileCss = './build/bundle.css'
+const BUILD_PATH = p.join('.', 'build')
+
+mkdirp.sync(BUILD_PATH)
+
+const entry = p.join(__dirname, 'frontend', 'index.js')
+const indexHtml = p.join(__dirname, 'frontend', 'index.html')
+
+const outfileJs = p.join(BUILD_PATH, 'bundle.js')
+const outfileCss = p.join(BUILD_PATH, 'bundle.css')
+const outfileHtml = p.join(BUILD_PATH, 'index.html')
 
 const mode = process.argv[2] === 'watch' ? 'watch' : 'build'
 const isDev = mode === 'watch'
@@ -25,7 +34,7 @@ if (mode === 'watch') {
   b.plugin(require('browserify-livereload'), {
     host: 'localhost',
     port: 13337,
-    outfile: outfile /* this option is required if using API mode */
+    outfile: outfileJs /* this option is required if using API mode */
   })
 }
 
@@ -36,11 +45,11 @@ function build () {
   b.bundle()
     .on('error', e => console.error(String(e)))
     .on('end', () => console.log('build finished'))
-    .pipe(fs.createWriteStream(outfile))
+    .pipe(fs.createWriteStream(outfileJs))
 }
 
 function docify () {
-  const d = documentify(false, fs.createReadStream('./frontend/index.html'))
+  const d = documentify(false, fs.createReadStream(indexHtml))
   const scriptLink = '/bundle.js'
   const styleLink = '/bundle.css'
   const header = [
@@ -51,7 +60,7 @@ function docify () {
   d.on('error', e => console.error(e))
   let rs = d.bundle()
   rs.on('error', e => console.error(e))
-  rs.pipe(fs.createWriteStream('./build/index.html'))
+  rs.pipe(fs.createWriteStream(outfileHtml))
 }
 
 function addToHead (str) {
