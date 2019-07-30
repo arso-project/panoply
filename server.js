@@ -3,7 +3,6 @@ const fastify = require('fastify')()
 const pump = require('pump')
 const querystring = require('query-string')
 const u = require('url')
-const eos = require('end-of-stream')
 
 const ndjson = require('./util/ndjson-duplex-stream')
 const { makeStore } = require('./store')
@@ -17,55 +16,52 @@ fastify.register(require('fastify-static'), {
 fastify.register(require('fastify-websocket'))
 
 fastify.get('/batch', { websocket: true }, (rawStream, req, params) => {
-  const stream = ndjson(rawStream)
   // TODO: Add auth.
-  let ended = false
-
-  eos(stream, () => (ended = true))
-
-  stream.on('data', msg => {
-    msg = Array.isArray(msg) ? msg : [msg]
-    console.log('batch go', msg)
-    store.batch(msg, (err, ids) => {
-      console.log('batch', err, ids)
-      if (ended) return
-      stream.write({ err, ids })
-    })
-  })
+  const stream = ndjson(rawStream)
+  // stream.on('data', d => console.log('msg', d))
+  const batchStream = store.createBatchStream()
+  pump(stream, batchStream, stream)
 })
-
 
 fastify.get('/query/:name', { websocket: true }, (rawStream, req, params) => {
   const stream = ndjson(rawStream)
 
   const { name } = params
+  const query = queryArgs(req.url)
 
-  console.log('new connection', name)
+  console.log('new connection', name, query)
 
   const [ view, method ] = name.split('.')
 
-  if (!(typeof store.api[view] === 'object' && typeof store.api[view][method] === 'function')) {
-    stream.destroy(new Error('Invalid query name'))
-    return
+  if (!(typeof store.api[view] === 'object' &&
+      typeof store.api[view][method] === 'function')) {
+    return stream.destroy(new Error('Invalid query name'))
   }
 
-  const rs = store.api[view][method]()
+  // TODO: Add safeguards / sanitze user input
+  // or formalize query args in other ways.
+  const queryStream = store.api[view][method](query)
+  const getStream = store.createGetStream()
 
-  // const url = u.parse(req.url)
-  // let query = {}
-  // if (url.search) {
-  //   query = { ...querystring.parse(url.search) }
-  // }
+  pump(queryStream, getStream, stream)
 
+  // TODO: Move to websocket middleware.
   stream.on('error', e => {
     if (e.code && e.code === 'ECONNRESET') return
     console.error(e)
   })
-
-  pump(rs, stream)
 })
 
 fastify.listen(9191, 'localhost', (err) => {
   if (err) return console.error(err)
   console.log(`Server listening on http://localhost:9191`)
 })
+
+function queryArgs (url) {
+  url = u.parse(url)
+  let query = {}
+  if (url.search) {
+    query = { ...querystring.parse(url.search) }
+  }
+  return query
+}

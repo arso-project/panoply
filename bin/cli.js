@@ -47,10 +47,15 @@ function put (cb) {
     console.log('batch result', data)
     cb()
   })
+
+  stream.on('error', error => {
+    console.error('Error', error)
+  })
 }
 
 function query (cb) {
   const stream = ndjson(ws(baseUrl + '/query/entities.all'))
+
   stream.on('data', row => {
     console.log('query', row)
   })
