@@ -3,19 +3,23 @@ const cstore = require('content-store')
 const mkdirp = require('mkdirp')
 const p = require('path')
 
+const mapView = require('./lib/mapview')
+
 module.exports = {
   makeStore
 }
 
-function makeStore (basePath) {
+function makeStore (basePath, opts) {
   const paths = {
     level: p.join(basePath, 'level'),
-    corestore: p.join(basePath, 'corestore'),
+    corestore: p.join(basePath, 'corestore')
   }
   Object.values(paths).forEach(p => mkdirp.sync(p))
 
   const level = leveldb(paths.level, 'level')
   const store = cstore(paths.corestore, null, { level })
+
+  store.useRecordView('mapView', mapView, { mappings: opts.mappings })
 
   return store
 }

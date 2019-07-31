@@ -19,10 +19,28 @@ put(() => {
 })
 
 function put (cb) {
-  const socket = ws(baseUrl + '/batch')
-  const stream = ndjson(socket)
+  const stream = ndjson(ws(baseUrl + '/batch'))
 
-  const records = [
+  const schema = {
+    title: 'Event',
+    properties: {
+      title: {
+        type: 'string',
+        index: true
+      },
+      date: {
+        type: 'date',
+        index: true
+      }
+    }
+  }
+
+  const batch = [
+    {
+      op: 'schema',
+      schema: 'event',
+      value: schema
+    },
     {
       op: 'put',
       schema: 'event',
@@ -41,10 +59,10 @@ function put (cb) {
     }
   ]
 
-  stream.write(records)
+  stream.write(batch)
 
   stream.on('data', data => {
-    console.log('batch result', data)
+    console.log('result', data)
     cb()
   })
 

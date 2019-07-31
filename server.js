@@ -7,7 +7,9 @@ const u = require('url')
 const ndjson = require('./util/ndjson-duplex-stream')
 const { makeStore } = require('./store')
 
-const store = makeStore('./data')
+const mappings = require('./lib/mappings')
+
+const store = makeStore('./data', { mappings })
 
 fastify.register(require('fastify-static'), {
   root: p.join(__dirname, 'build')
