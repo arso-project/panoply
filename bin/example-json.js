@@ -5,7 +5,9 @@ const minimist = require('minimist')
 
 const argv = minimist(process.argv.slice(2), {
   alias: {
-    s: 'schema'
+    s: 'schema',
+    f: 'from',
+    t: 'to'
   }
 })
 
@@ -17,6 +19,8 @@ Arguments:
 
 Options:
   -s, --schema: Schema string
+  -f, --from: Start index
+  -t, --to: End index
 `)
 }
 
@@ -38,6 +42,8 @@ try {
 }
 
 if (!Array.isArray(json)) exit('Not an array.')
+
+json = json.slice(argv.from || 0, argv.to || undefined)
 
 const data = json.map(value => {
   return {
