@@ -1,15 +1,34 @@
 // TODO: ES5 require.
 const React = require('react')
-const { useMemo, useState } = require('react')
+const { useMemo, useState, useCallback } = require('react')
 const ReactDOM = require('react-dom')
 const ndjson = require('../util/ndjson-duplex-stream')
 const ws = require('websocket-stream')
 const { useReadable } = require('./lib/utils.js')
+const queryString = require('query-string')
+const { debounce } = require('lodash')
 
 const baseUrl = window.location.origin.replace(/^http/, 'ws')
 
 function Page () {
-  return <AllEntities />
+  return (
+    <div>
+      <Search />
+      <AllEntities />
+    </div>
+  )
+}
+
+function Search () {
+  const [query, setQuery] = useState('')
+  const results = useQuery('search.query', { query })
+  // const onInputChange = useCallback(debounce(e => setQuery(e.target.value), 100), [])
+  return (
+    <div>
+      <input type='text' onChange={e => setQuery(e.target.value)} />
+      <List list={results} />
+    </div>
+  )
 }
 
 function AllEntities () {
@@ -96,12 +115,16 @@ function Card (props) {
   )
 }
 
-function useQuery (query) {
+function useQuery (query, args) {
+  let querystring = ''
+  if (args) {
+    querystring = queryString.stringify(args)
+  }
   const stream = useMemo(() => {
-    const websocket = ws(baseUrl + '/query/' + query)
+    const websocket = ws(baseUrl + '/query/' + query + '?' + querystring)
     const stream = ndjson(websocket)
     return stream
-  }, [query])
+  }, [query, querystring])
   const list = useReadable(stream)
   return list
 }

@@ -4,7 +4,7 @@ const { useState, useEffect } = require('react')
 module.exports = { debouncedStream, useReadable }
 
 function debouncedStream (rs, opts) {
-  const interval = typeof opts === 'number' ? opts : 125
+  const interval = typeof opts === 'number' ? opts : 10
 
   let clear
   let cache = []
@@ -39,7 +39,7 @@ function useReadable (stream) {
 
   useEffect(() => {
     setList([])
-    const ts = debouncedStream(stream, 100)
+    const ts = debouncedStream(stream)
     ts.on('data', onData)
     return () => {
       ts.removeListener('data', onData)

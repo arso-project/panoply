@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/arso-project/panoply#readme",
   "dependencies": {
+    "@archipel/sonar": "0.0.3",
     "classnames": "^2.2.6",
     "content-store": "github:arso-project/content-store#master",
     "duplexify": "^4.1.1",

@@ -29,9 +29,9 @@ fastify.get('/query/:name', { websocket: true }, (rawStream, req, params) => {
   const stream = ndjson(rawStream)
 
   const { name } = params
-  const query = queryArgs(req.url)
+  const args = queryArgs(req.url)
 
-  console.log('new connection', name, query)
+  console.log('new connection', name, args)
 
   const [ view, method ] = name.split('.')
 
@@ -42,10 +42,15 @@ fastify.get('/query/:name', { websocket: true }, (rawStream, req, params) => {
 
   // TODO: Add safeguards / sanitze user input
   // or formalize query args in other ways.
-  const queryStream = store.api[view][method](query)
+  const queryStream = store.api[view][method](args)
   const getStream = store.createGetStream()
 
-  pump(queryStream, getStream, stream)
+  // TODO: Formalize this without special casing.
+  if (view === 'entities') {
+    pump(queryStream, getStream, stream)
+  } else {
+    pump(queryStream, stream)
+  }
 
   // TODO: Move to websocket middleware.
   stream.on('error', e => {
