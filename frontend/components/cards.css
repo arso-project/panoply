@@ -1,0 +1,78 @@
+.wrap {
+  display: block;
+  display: grid;
+  grid-template-columns: 1fr min-content;
+  grid-gap: 1rem;
+  padding: 1rem;
+  max-height: calc(100vh - 200px);
+  overflow: hidden;
+}
+
+.main {
+  width: 50vw;
+  background: hsl(var(--hue), 10%, 90%);
+  padding: 1rem;
+  font-size: 4rem;
+  line-height: 1em;
+}
+
+.cards {
+  height: calc(100vh - 200px);
+  overflow-y: auto;
+  display: grid;
+  /* grid-template-columns: repeat(6, 1fr); */
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  grid-gap: 1rem;
+  > div {
+    --lightness: 50%;
+    --cur-hue: var(--hue);
+
+    padding: 3rem 0;
+    height: 10rem;
+
+    color: white;
+    text-align: center;
+    font-size: 2rem;
+    cursor: pointer;
+
+    border: 1rem solid transparent;
+
+    /* transition: border-color ease-in-out .2s, background-color ease-in-out .2s; */
+
+    background-color: hsl(
+      var(--cur-hue),
+      100%,
+      var(--lightness)
+    );
+
+
+    &:hover {
+      --lightness: 40%;
+      /* color: black; */
+    }
+
+    &.active {
+      border-color: hsl(var(--cur-hue), 100%, 20%);
+      --lightness: 40%;
+    }
+
+    &:nth-child(6n + 0) {
+      --cur-hue: calc(var(--hue) + 0 * 60);
+    }
+    &:nth-child(6n + 1) {
+      --cur-hue: calc(var(--hue) + 1 * 60);
+    }
+    &:nth-child(6n + 2) {
+      --cur-hue: calc(var(--hue) + 2 * 60);
+    }
+    &:nth-child(6n + 3) {
+      --cur-hue: calc(var(--hue) + 3 * 60);
+    }
+    &:nth-child(6n + 4) {
+      --cur-hue: calc(var(--hue) + 4 * 60);
+    }
+    &:nth-child(6n + 5) {
+      --cur-hue: calc(var(--hue) + 5 * 60);
+    }
+  }
+}

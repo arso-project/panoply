@@ -15,6 +15,7 @@ module.exports = function (opts) {
 
   const head = [
     `<link rel="stylesheet" href="${link('/main.css')}">`,
+    `<link rel="stylesheet" href="${link('/fonts/iAQuattro/ia-quattro.css')}">`,
     ...opts.head
   ].join('')
 

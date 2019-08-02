@@ -1,0 +1,13 @@
+@import "css-reset-and-normalize";
+
+:global {
+  body {
+    line-height: 1.5;
+    font-family: 'iA Quattro', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+  }
+}
+

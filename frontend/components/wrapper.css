@@ -1,12 +1,78 @@
-@import "css-reset-and-normalize";
+.root {
+  --hue: 327;
+  --color-border: hsl(var(--hue), 20%, 80%);
+  --color-bg: hsl(var(--hue), 10%, 98%);
+  --color-primary: hsl(var(--hue), 100%, 70%);
+}
 
-:global {
-  body {
-    line-height: 1.5rem;
-  }
+.active {}
 
-  h1, h2, h3, h4, h5, h6 {
+.nav {
+  --border-style: 2px solid #fff;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 20rem);
+  grid-gap: 1rem;
+  padding: 1rem;
+
+  > a {
+    display: block;
+    border-right: var(--border-style);
+    background-color: var(--color-primary);
+
+    &:last-child {
+      border-right: none;
+    }
+    flex: 1;
+    padding: .25rem;
+    color: black;
+    text-align: center;
+    text-decoration: none;
     font-weight: bold;
+    &.active,
+    &:hover {
+      background-color: hsl(var(--hue), 100%, 40%);
+      color: white;
+    }
   }
 }
 
+.cards {
+  display: grid;
+  /* grid-template-columns: repeat(6, 1fr); */
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  grid-gap: 1rem;
+  padding: 1rem;
+  > div {
+    --lightness: 40%;
+    color: white;
+    text-align: center;
+    /* height: 8rem; */
+    padding: 3rem 0;
+    font-size: 2rem;
+    background-color: hsl(var(--hue), 100%, 50%);
+    cursor: pointer;
+    &:hover {
+      --lightness: 70%;
+      color: black;
+    }
+    &:nth-child(6n) {
+      background-color: hsl(calc(var(--hue) + 60), 100%, var(--lightness));
+    }
+    &:nth-child(6n + 1) {
+      background-color: hsl(calc(var(--hue) + 2 * 60), 100%, var(--lightness));
+    }
+    &:nth-child(6n + 2) {
+      background-color: hsl(calc(var(--hue) + 3 * 60), 100%, var(--lightness));
+    }
+    &:nth-child(6n + 3) {
+      background-color: hsl(calc(var(--hue) + 4 * 60), 100%, var(--lightness));
+    }
+    &:nth-child(6n + 4) {
+      background-color: hsl(calc(var(--hue) + 5 * 60), 100%, var(--lightness));
+    }
+    &:nth-child(6n + 5) {
+      background-color: hsl(calc(var(--hue) + 6 * 60), 100%, var(--lightness));
+    }
+  }
+}
