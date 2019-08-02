@@ -2,7 +2,7 @@ const routes = [
   {
     path: '/',
     exact: true,
-    component: require('./pages/index.jsx')
+    component: require('./pages/home.jsx')
   },
   {
     path: '/id/:id',

@@ -3,8 +3,9 @@ const p = require('path')
 const browserify = require('browserify')
 const mkdirp = require('mkdirp')
 const minimist = require('minimist')
-const html = require('./html.js')
 const mirror = require('mirror-folder')
+
+const html = require('./html.js')
 
 const argv = minimist(process.argv.slice(2), {
   alias: { w: 'watch' }
@@ -94,14 +95,33 @@ function makeBrowserify (entry, opts = {}) {
   const b = browserify(entry, opts)
     .transform('babelify')
 
+  let cssPath
   if (opts.css) {
-    const cssPath = p.join(BUILD_PATHS.browser, 'main.css')
-    b.transform('sheetify', { transform: [ 'sheetify-postcss' ], basedir: __dirname })
-    b.plugin('css-extract', {
-      out: () => fs.createWriteStream(cssPath),
-      sourceMaps: true
-    })
+    cssPath = p.join(BUILD_PATHS.browser, 'main.css')
   }
+
+  b.plugin('css-modulesify', {
+    output: cssPath,
+    before: [
+      'postcss-import',
+      require('postcss-nested')
+    ],
+    after: [
+      require('autoprefixer')
+    ],
+    'postcss-import': {
+      // Apparently, css-modulesify passes a wrong
+      // absolute path to postcss for each source file.
+      // This makes postcss-import not find anything.
+      // Setting the path opt to node_modules at least
+      // allows to directly include style sheets from
+      // npm modules (though without resolving via
+      // package.json main field). See also:
+      // https://github.com/css-modules/css-modulesify/issues/82
+      // https://github.com/css-modules/css-modulesify/issues/80
+      path: [p.join(__dirname, '..', 'node_modules')]
+    }
+  })
 
   if (opts.tinify) {
     b.plugin('tinyify')

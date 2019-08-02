@@ -3,12 +3,12 @@ const { Link } = require('react-router-dom')
 
 module.exports = Wrapper
 
-require('normalize.css')
+const styles = require('./wrapper.css')
 
 function Wrapper (props) {
   const { children } = props
   return (
-    <div>
+    <div className={styles.root}>
       <nav>
         <Link to='/'>Home</Link>
         <Link to='/id/foo'>Id: foo</Link>

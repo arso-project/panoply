@@ -5,10 +5,11 @@ const ws = require('websocket-stream')
 const queryString = require('query-string')
 // const { debounce } = require('lodash')
 
-const Wrapper = require('./wrapper.jsx')
-
-const { useReadable, IS_SERVER } = require('../lib/utils.js')
 const ndjson = require('../../util/ndjson-duplex-stream')
+const { useReadable, IS_SERVER } = require('../lib/utils.js')
+const Wrapper = require('../components/wrapper.jsx')
+
+const styles = require('./home.css')
 
 const baseUrl = IS_SERVER
   ? process.env.ARCHIPEL_API_URL || 'ws://localhost:9191'
@@ -48,7 +49,7 @@ function AllEntities () {
       return acc
     }, {})
   }, [results])
-  console.log(results)
+  // console.log(results)
 
   const [selectedSchema, setSelectedSchema] = useState(null)
 
@@ -60,7 +61,7 @@ function AllEntities () {
     <ul>
       {Object.keys(bySchema).map(schema => (
         <li key={schema}>
-          <h2 onClick={e => toggleSchema(schema)}>
+          <h2 className={styles.title} onClick={e => toggleSchema(schema)}>
             {schema}
           </h2>
           {schema === selectedSchema && (
