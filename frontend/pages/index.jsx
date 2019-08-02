@@ -1,21 +1,27 @@
 // TODO: ES5 require.
 const React = require('react')
 const { useMemo, useState, useCallback } = require('react')
-const ReactDOM = require('react-dom')
-const ndjson = require('../util/ndjson-duplex-stream')
 const ws = require('websocket-stream')
-const { useReadable } = require('./lib/utils.js')
 const queryString = require('query-string')
-const { debounce } = require('lodash')
+// const { debounce } = require('lodash')
 
-const baseUrl = window.location.origin.replace(/^http/, 'ws')
+const Wrapper = require('./wrapper.jsx')
 
-function Page () {
+const { useReadable, IS_SERVER } = require('../lib/utils.js')
+const ndjson = require('../../util/ndjson-duplex-stream')
+
+const baseUrl = IS_SERVER
+  ? process.env.ARCHIPEL_API_URL || 'ws://localhost:9191'
+  : window.location.origin.replace(/^http/, 'ws')
+
+module.exports = Page
+
+function Page (props) {
   return (
-    <div>
+    <Wrapper {...props}>
       <Search />
       <AllEntities />
-    </div>
+    </Wrapper>
   )
 }
 
@@ -128,5 +134,3 @@ function useQuery (query, args) {
   const list = useReadable(stream)
   return list
 }
-
-ReactDOM.render(<Page />, document.getElementById('root'))

@@ -1,7 +1,18 @@
 const { Transform } = require('stream')
 const { useState, useEffect } = require('react')
+const pump = require('pump')
 
-module.exports = { debouncedStream, useReadable }
+const IS_SERVER = !(
+  typeof window !== 'undefined' &&
+  window.document &&
+  window.document.createElement
+)
+
+module.exports = {
+  debouncedStream,
+  useReadable,
+  IS_SERVER
+}
 
 function debouncedStream (rs, opts) {
   const interval = typeof opts === 'number' ? opts : 10
@@ -31,11 +42,25 @@ function debouncedStream (rs, opts) {
     cache = []
   }
 
-  return rs.pipe(ts)
+  return pump(rs, ts)
+}
+
+function collectStream (stream, cb) {
+  let buf = []
+  let ret
+  if (!cb) {
+    ret = new Promise((resolve, reject) => {
+      cb = (err, buf) => err ? reject(err) : resolve(buf)
+    })
+  }
+  stream.on('data', d => buf.push(d))
+  stream.on('error', err => cb(err))
+  stream.on('end', () => cb(null, buf))
+  return ret
 }
 
 function useReadable (stream) {
-  const [list, setList] = useState([])
+  let [list, setList] = useState([])
 
   useEffect(() => {
     setList([])
@@ -43,6 +68,8 @@ function useReadable (stream) {
     ts.on('data', onData)
     return () => {
       ts.removeListener('data', onData)
+      // TODO: Do this here?
+      ts.destroy()
     }
   }, [stream])
 
@@ -52,3 +79,4 @@ function useReadable (stream) {
 
   return list
 }
+

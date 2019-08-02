@@ -1,2 +1,3 @@
 # panoply
-A multi-scope GUI for Archipel/cstore/Sonar
+
+A multi-scope GUI for Archipel/cstore/Sonar.

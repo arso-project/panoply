@@ -1,0 +1,11 @@
+{
+  "short_name": "Archipel",
+  "name": "Archipel",
+  "icons": [
+
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFFFFF"
+}

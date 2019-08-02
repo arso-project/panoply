@@ -1,5 +1,4 @@
 const p = require('path')
-const fastify = require('fastify')()
 const pump = require('pump')
 const querystring = require('query-string')
 const u = require('url')
@@ -9,10 +8,20 @@ const { makeStore } = require('./store')
 
 const mappings = require('./lib/mappings')
 
+const log = require('./lib/log')
+
+const fastify = require('fastify')({
+  logger: log.child({ component: 'fastify' })
+})
+
 const store = makeStore('./data', { mappings })
 
-fastify.register(require('fastify-static'), {
-  root: p.join(__dirname, 'build')
+// fastify.register(require('fastify-static'), {
+//   root: p.join(__dirname, 'frontend', 'build')
+// })
+
+fastify.register(require('./frontend/fastify'), {
+  // prefix: '/ssr'
 })
 
 fastify.register(require('fastify-websocket'))
