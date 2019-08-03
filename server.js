@@ -1,9 +1,11 @@
-const p = require('path')
+// const p = require('path')
 const pump = require('pump')
 const querystring = require('query-string')
 const u = require('url')
+// const through = require('through2')
 
 const ndjson = require('./util/ndjson-duplex-stream')
+const { collectStream } = require('./util/stream')
 const { makeStore } = require('./store')
 
 const mappings = require('./lib/mappings')
@@ -16,10 +18,6 @@ const fastify = require('fastify')({
 
 const store = makeStore('./data', { mappings })
 
-// fastify.register(require('fastify-static'), {
-//   root: p.join(__dirname, 'frontend', 'build')
-// })
-
 fastify.register(require('./frontend/fastify'), {
   // prefix: '/ssr'
 })
@@ -29,7 +27,6 @@ fastify.register(require('fastify-websocket'))
 fastify.get('/batch', { websocket: true }, (rawStream, req, params) => {
   // TODO: Add auth.
   const stream = ndjson(rawStream)
-  // stream.on('data', d => console.log('msg', d))
   const batchStream = store.createBatchStream()
   pump(stream, batchStream, stream)
 })
@@ -56,9 +53,9 @@ fastify.get('/query/:name', { websocket: true }, (rawStream, req, params) => {
 
   // TODO: Formalize this without special casing.
   if (view === 'entities') {
-    pump(queryStream, getStream, stream)
+    pump(queryStream, getStream, collectStream(100), stream)
   } else {
-    pump(queryStream, stream)
+    pump(queryStream, collectStream(100), stream)
   }
 
   // TODO: Move to websocket middleware.

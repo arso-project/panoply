@@ -7,7 +7,7 @@ const queryString = require('query-string')
 const cn = require('classnames')
 
 const ndjson = require('../../util/ndjson-duplex-stream')
-const { useReadable, useDebounce, IS_SERVER } = require('../lib/utils.js')
+const { useReadable, useDebouncedState, IS_SERVER } = require('../lib/utils.js')
 const Wrapper = require('../components/wrapper.jsx')
 
 const styles = require('./home.css')
@@ -43,7 +43,11 @@ function Search () {
 
 function AllEntities () {
   // const listOpts = useRef({ count: 20, offset: 0 })
-  const [results, length] = useQuery('entities.all', {}, {})
+  // const [count, setCount] = useState(10)
+  // const [offset, setOffset] = useState(0)
+  const [listOpts, listHeader] = useListHeader()
+  console.log('render', listOpts)
+  const [results, length] = useQuery('entities.all', {}, listOpts)
 
   const bySchema = useMemo(() => {
     if (!results.length) return {}
@@ -53,15 +57,10 @@ function AllEntities () {
       return acc
     }, {})
   }, [results])
-  // console.log(results)
 
   const [selectedSchema, setSelectedSchema] = useState(null)
 
   if (!results) return
-
-  function toggleSchema (schema) {
-    setSelectedSchema(s => s === schema ? null : schema)
-  }
 
   return (
     <div className={styles.wrap}>
@@ -77,6 +76,7 @@ function AllEntities () {
         ))}
       </ul>
       <div>
+        {listHeader(length)}
         {selectedSchema && (
           <List list={bySchema[selectedSchema]} length={length} />
         )}
@@ -88,39 +88,65 @@ function AllEntities () {
     return schema.split('/')[1]
   }
 
+  function toggleSchema (schema) {
+    setSelectedSchema(s => s === schema ? null : schema)
+  }
+
   // if (!results.length) return null
   // return <List list={results} />
 }
 
 function useListHeader (length) {
-  const [count, setCount] = useState(20)
-  const [offset, setOffset] = useState(0)
-  const dOffset = useDebounce(offset, 50)
-  const dCount = useDebounce(count, 50)
-  const props = { setOffset, setCount, count: dCount, offset: dOffset }
-  return props
+  const [count, setCount] = useDebouncedState(20, 20)
+  const [offset, setOffset] = useDebouncedState(0, 20)
+  // const [filter, setFilter] = useState(null, 50)
+  const opts = { count, offset }
+  const props = { setCount, setOffset }
+  return [opts, header]
+
+  function header (length) {
+    return <ListHeader {...opts} {...props} length={length} />
+  }
 }
 
 function ListHeader (props) {
-  const { length } = props
-  const { setOffset, setCount, count, offset } = useListHeader(length)
+  // const [filterText, setFilterText] = useState('')
+  const { setOffset, setCount, count, offset, length } = props
   return (
     <header>
+      <div>
         Offset:
-      <input type='range' min={0} max={length} onChange={e => setOffset(e.target.value)} />
-      {offset}
+        <input type='range' min={0} max={length - count} onChange={e => setOffset(parseInt(e.target.value))} />
+        {offset}
+      </div>
+      <div>
         Count:
-      <input type='text' value={count} onChange={e => setCount(e.target.value)} />
-      {count}
+        <input type='range' min={1} max={100} value={count} onChange={e => setCount(parseInt(e.target.value))} />
+        {count}
+      </div>
       <div>
           Length <strong>{length}</strong>
       </div>
     </header>
   )
+
+  // function onFilterChange (text) {
+  //   setFilterText(text)
+  //   setFilter(() => {
+  //     return (record) => {
+  //       console.log('filter', record)
+  //       if (!record.value.title) return
+  //       let stringTitle = forceToString(record.value.title).toLowerCase()
+  //       return stringTitle.includes(text.toLowerCase)
+  //     }
+  //   })
+  // }
 }
 
 function List (props) {
   const { list } = props
+
+  if (!list) return null
 
   return (
     <div className={styles.list}>
@@ -204,6 +230,12 @@ function IntoCard (props) {
       return <em>Cannot display</em>
     }
   }
+}
+
+function forceToString (value) {
+  if (typeof value === 'string' || typeof value === 'number') {
+    return value
+  } else return JSON.stringify(value)
 }
 
 function Card (props) {

@@ -12,6 +12,7 @@ module.exports = {
   debouncedStream,
   useReadable,
   useDebounce,
+  useDebouncedState,
   useUpdate,
   useSSRTest,
   IS_SERVER
@@ -68,16 +69,16 @@ function collectStream (stream, cb) {
 
 function useReadable (stream, opts) {
   // if (IS_SERVER) return useReadableSSR(stream, opts)
-
-  const { count = 20, offset = 0 } = opts
+  let { count = 20, offset = 0 } = opts
 
   const buf = useMemo(() => [], [stream])
 
   const list = useMemo(() => {
-    return buf.slice(offset, count)
+    let slice = buf.slice(offset, offset + count)
+    return slice
   }, [buf.length, count, offset])
 
-  const debouncedUpdate = useDebouncedUpdate()
+  const debouncedUpdate = useDebouncedUpdate(100)
 
   useEffect(() => {
     stream.on('data', onData)
@@ -88,10 +89,12 @@ function useReadable (stream, opts) {
     }
   }, [stream])
 
-  return [list, buf.length]
+  return useMemo(() => [list, buf.length], [list, buf.length])
 
   function onData (item) {
-    buf.push(item)
+    if (!Array.isArray(item)) item = [item]
+    buf.push(...item)
+    // if (buf.length > count + offset) return
     debouncedUpdate()
   }
 }
@@ -137,4 +140,10 @@ function useDebounce (value, delay) {
   }, [value, delay]) // Only re-call effect if value or delay changes
 
   return debouncedValue
+}
+
+function useDebouncedState (defaultValue, delay) {
+  const [_state, setState] = useState(defaultValue)
+  const state = useDebounce(_state, delay)
+  return [state, setState]
 }
