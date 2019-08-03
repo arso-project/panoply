@@ -1,5 +1,5 @@
 const { Transform } = require('stream')
-const { useState, useEffect } = require('react')
+const { useState, useEffect, useMemo, useRef } = require('react')
 const pump = require('pump')
 
 const IS_SERVER = !(
@@ -11,7 +11,14 @@ const IS_SERVER = !(
 module.exports = {
   debouncedStream,
   useReadable,
+  useDebounce,
+  useUpdate,
+  useSSRTest,
   IS_SERVER
+}
+
+function useSSRTest () {
+  return 'foo'
 }
 
 function debouncedStream (rs, opts) {
@@ -59,24 +66,75 @@ function collectStream (stream, cb) {
   return ret
 }
 
-function useReadable (stream) {
-  let [list, setList] = useState([])
+function useReadable (stream, opts) {
+  // if (IS_SERVER) return useReadableSSR(stream, opts)
+
+  const { count = 20, offset = 0 } = opts
+
+  const buf = useMemo(() => [], [stream])
+
+  const list = useMemo(() => {
+    return buf.slice(offset, count)
+  }, [buf.length, count, offset])
+
+  const debouncedUpdate = useDebouncedUpdate()
 
   useEffect(() => {
-    setList([])
-    const ts = debouncedStream(stream)
-    ts.on('data', onData)
+    stream.on('data', onData)
     return () => {
-      ts.removeListener('data', onData)
+      stream.removeListener('data', onData)
       // TODO: Do this here?
-      ts.destroy()
+      stream.destroy()
     }
   }, [stream])
 
-  function onData (list) {
-    setList(oldList => [...oldList, ...list])
-  }
+  return [list, buf.length]
 
-  return list
+  function onData (item) {
+    buf.push(item)
+    debouncedUpdate()
+  }
 }
 
+function useDebouncedUpdate (interval) {
+  const timeout = useRef(null)
+  const update = useUpdate()
+  function maybeUpdate () {
+    if (!timeout.current) {
+      timeout.current = setTimeout(() => {
+        timeout.current = null
+        update()
+      }, interval || 50)
+    }
+  }
+  return maybeUpdate
+}
+
+function useUpdate () {
+  const [counter, setCounter] = useState(0)
+  return update
+  function update () {
+    setCounter(c => c + 1)
+  }
+}
+
+function useDebounce (value, delay) {
+  // State and setters for debounced value
+  const [debouncedValue, setDebouncedValue] = useState(value)
+
+  useEffect(() => {
+    // Update debounced value after delay
+    const handler = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    // Cancel the timeout if value changes (also on delay change or unmount)
+    // This is how we prevent debounced value from updating if value is changed ...
+    // .. within the delay period. Timeout gets cleared and restarted.
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [value, delay]) // Only re-call effect if value or delay changes
+
+  return debouncedValue
+}

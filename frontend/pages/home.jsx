@@ -1,13 +1,13 @@
 // TODO: ES5 require.
 const React = require('react')
-const { useMemo, useState, useCallback } = require('react')
+const { useMemo, useEffect, useState, useCallback, useRef } = require('react')
 const ws = require('websocket-stream')
 const queryString = require('query-string')
 // const { debounce } = require('lodash')
 const cn = require('classnames')
 
 const ndjson = require('../../util/ndjson-duplex-stream')
-const { useReadable, IS_SERVER } = require('../lib/utils.js')
+const { useReadable, useDebounce, IS_SERVER } = require('../lib/utils.js')
 const Wrapper = require('../components/wrapper.jsx')
 
 const styles = require('./home.css')
@@ -29,20 +29,21 @@ function Page (props) {
 
 function Search () {
   const [query, setQuery] = useState('')
-  const results = useQuery('search.query', { query })
+  const [results, length] = useQuery('search.query', { query })
   // const onInputChange = useCallback(debounce(e => setQuery(e.target.value), 100), [])
   return (
     <div className={styles.wrap}>
       <div>
         <input type='text' onChange={e => setQuery(e.target.value)} />
       </div>
-      <List list={results} />
+      <List list={results} length={length} />
     </div>
   )
 }
 
 function AllEntities () {
-  const results = useQuery('entities.all')
+  // const listOpts = useRef({ count: 20, offset: 0 })
+  const [results, length] = useQuery('entities.all', {}, {})
 
   const bySchema = useMemo(() => {
     if (!results.length) return {}
@@ -55,6 +56,8 @@ function AllEntities () {
   // console.log(results)
 
   const [selectedSchema, setSelectedSchema] = useState(null)
+
+  if (!results) return
 
   function toggleSchema (schema) {
     setSelectedSchema(s => s === schema ? null : schema)
@@ -73,9 +76,11 @@ function AllEntities () {
           </li>
         ))}
       </ul>
-      {selectedSchema && (
-        <List list={bySchema[selectedSchema].slice(0, 100)} />
-      )}
+      <div>
+        {selectedSchema && (
+          <List list={bySchema[selectedSchema]} length={length} />
+        )}
+      </div>
     </div>
   )
 
@@ -86,8 +91,37 @@ function AllEntities () {
   // if (!results.length) return null
   // return <List list={results} />
 }
+
+function useListHeader (length) {
+  const [count, setCount] = useState(20)
+  const [offset, setOffset] = useState(0)
+  const dOffset = useDebounce(offset, 50)
+  const dCount = useDebounce(count, 50)
+  const props = { setOffset, setCount, count: dCount, offset: dOffset }
+  return props
+}
+
+function ListHeader (props) {
+  const { length } = props
+  const { setOffset, setCount, count, offset } = useListHeader(length)
+  return (
+    <header>
+        Offset:
+      <input type='range' min={0} max={length} onChange={e => setOffset(e.target.value)} />
+      {offset}
+        Count:
+      <input type='text' value={count} onChange={e => setCount(e.target.value)} />
+      {count}
+      <div>
+          Length <strong>{length}</strong>
+      </div>
+    </header>
+  )
+}
+
 function List (props) {
   const { list } = props
+
   return (
     <div className={styles.list}>
       {list.map((row, key) => (
@@ -191,7 +225,7 @@ function Card (props) {
   )
 }
 
-function useQuery (query, args) {
+function useQuery (query, args, opts) {
   let querystring = ''
   if (args) {
     querystring = queryString.stringify(args)
@@ -201,8 +235,10 @@ function useQuery (query, args) {
     const stream = ndjson(websocket)
     return stream
   }, [query, querystring])
-  const list = useReadable(stream)
-  return list
+  // [list, length]
+  const ret = useReadable(stream, opts || {})
+  // console.log({ list, length })
+  return ret
 }
 
 function ListOld (props) {

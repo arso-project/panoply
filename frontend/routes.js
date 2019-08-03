@@ -8,6 +8,11 @@ const routes = [
     path: '/id/:id',
     exact: true,
     component: require('./pages/id.jsx')
+  },
+  {
+    path: '/debug',
+    exact: true,
+    component: require('./pages/debug.jsx')
   }
 ]
 

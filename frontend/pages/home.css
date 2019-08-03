@@ -16,11 +16,20 @@
   }
 }
 
+.list {
+  display: grid;
+  max-width: 100%;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 1rem;
+}
+
 .card {
   max-width: 100%;
-  margin-bottom: 1rem;
+  overflow: hidden;
   /* background-color: hsl(var(--hue), 24%, 93%); */
   border: 1px solid hsla(var(--hue), 80%, 40%, 20%);
+  display: flex;
+  flex-direction: column;
   > * {
     padding: 0 1rem;
   }
@@ -39,6 +48,7 @@
   }
 
   > main {
+    flex: 1;
     /* font-size: 1.5rem; */
   }
 
