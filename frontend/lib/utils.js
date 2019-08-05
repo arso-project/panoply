@@ -74,6 +74,7 @@ function useReadable (stream, opts) {
   const buf = useMemo(() => [], [stream])
 
   const list = useMemo(() => {
+    if (!count) return [...buf]
     let slice = buf.slice(offset, offset + count)
     return slice
   }, [buf.length, count, offset])

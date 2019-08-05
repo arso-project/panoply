@@ -36,7 +36,7 @@ function Search () {
       <div>
         <input type='text' onChange={e => setQuery(e.target.value)} />
       </div>
-      <List list={results} length={length} />
+      <List list={results} />
     </div>
   )
 }
@@ -45,11 +45,11 @@ function AllEntities () {
   // const listOpts = useRef({ count: 20, offset: 0 })
   // const [count, setCount] = useState(10)
   // const [offset, setOffset] = useState(0)
-  const [listOpts, listHeader] = useListHeader()
-  console.log('render', listOpts)
-  const [results, length] = useQuery('entities.all', {}, listOpts)
+  const [results, length] = useQuery('entities.all', {}, { count: 0 })
+  // const { count, offset, header } = useListHeader()
+  console.log('res', results)
 
-  const bySchema = useMemo(() => {
+  const grouped = useMemo(() => {
     if (!results.length) return {}
     return results.reduce((acc, row) => {
       acc[row.schema] = acc[row.schema] || []
@@ -57,6 +57,7 @@ function AllEntities () {
       return acc
     }, {})
   }, [results])
+  console.log('grouped', grouped)
 
   const [selectedSchema, setSelectedSchema] = useState(null)
 
@@ -65,20 +66,19 @@ function AllEntities () {
   return (
     <div className={styles.wrap}>
       <ul>
-        {Object.keys(bySchema).map(schema => (
+        {Object.keys(grouped).map(schema => (
           <li key={schema}>
             <h2
               className={cn(styles.title, { [styles.active]: schema === selectedSchema })}
               onClick={e => toggleSchema(schema)}>
-              {schemaName(schema)}
+              {schemaName(schema)} <em>{grouped[schema].length}</em>
             </h2>
           </li>
         ))}
       </ul>
       <div>
-        {listHeader(length)}
         {selectedSchema && (
-          <List list={bySchema[selectedSchema]} length={length} />
+          <List list={grouped[selectedSchema]} />
         )}
       </div>
     </div>
@@ -102,7 +102,8 @@ function useListHeader (length) {
   // const [filter, setFilter] = useState(null, 50)
   const opts = { count, offset }
   const props = { setCount, setOffset }
-  return [opts, header]
+  return { count, offset, header }
+  // return [opts, header]
 
   function header (length) {
     return <ListHeader {...opts} {...props} length={length} />
@@ -145,14 +146,20 @@ function ListHeader (props) {
 
 function List (props) {
   const { list } = props
+  const { count, offset, header } = useListHeader()
 
-  if (!list) return null
+  const slice = useMemo(() => count ? list.slice(offset, offset + count) : list, [list, count, offset])
+
+  if (!list || !list.length) return null
 
   return (
-    <div className={styles.list}>
-      {list.map((row, key) => (
-        <IntoCard key={key} record={row} />
-      ))}
+    <div>
+      {header(list.length)}
+      <div className={styles.list}>
+        {slice.map((row, key) => (
+          <IntoCard key={key} record={row} />
+        ))}
+      </div>
     </div>
   )
 }
