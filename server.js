@@ -2,7 +2,8 @@
 const pump = require('pump')
 const querystring = require('query-string')
 const u = require('url')
-// const through = require('through2')
+const through = require('through2')
+const crypto = require('crypto')
 
 const ndjson = require('./util/ndjson-duplex-stream')
 const { collectStream } = require('./util/stream')
@@ -29,6 +30,12 @@ fastify.get('/batch', { websocket: true }, (rawStream, req, params) => {
   const stream = ndjson(rawStream)
   const batchStream = store.createBatchStream()
   pump(stream, batchStream, stream)
+})
+
+fastify.get('/get', { websocket: true }, (rawStream, req) => {
+  const stream = ndjson(rawStream)
+  const getStream = store.createGetStream()
+  pump(stream, getStream, stream)
 })
 
 fastify.get('/query/:name', { websocket: true }, (rawStream, req, params) => {

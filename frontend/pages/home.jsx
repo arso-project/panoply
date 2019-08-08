@@ -8,6 +8,7 @@ const cn = require('classnames')
 
 const ndjson = require('../../util/ndjson-duplex-stream')
 const { useReadable, useDebouncedState, IS_SERVER } = require('../lib/utils.js')
+const { useQuery } = require('../lib/records.js')
 const Wrapper = require('../components/wrapper.jsx')
 
 const styles = require('./home.css')
@@ -29,39 +30,43 @@ function Page (props) {
 
 function Search () {
   const [query, setQuery] = useState('')
-  const [results, length] = useQuery('search.query', { query })
+  const params = useMemo(() => ({ query }), [query])
+  const results = useQuery('search.query', params)
   // const onInputChange = useCallback(debounce(e => setQuery(e.target.value), 100), [])
   return (
     <div className={styles.wrap}>
       <div>
         <input type='text' onChange={e => setQuery(e.target.value)} />
       </div>
-      <List list={results} />
+      <GroupedList list={results} />
     </div>
   )
 }
 
 function AllEntities () {
-  // const listOpts = useRef({ count: 20, offset: 0 })
-  // const [count, setCount] = useState(10)
-  // const [offset, setOffset] = useState(0)
-  const [results, length] = useQuery('entities.all', {}, { count: 0 })
-  // const { count, offset, header } = useListHeader()
-  console.log('res', results)
+  const results = useQuery('entities.all')
+  useEffect(() => {
+    if (results.length === 0) console.time('entities')
+    if (results.length >= 1000) console.timeEnd('entities')
+  }, [results.length])
+  return <GroupedList list={results} />
+}
+
+function GroupedList (props) {
+  const { list } = props
 
   const grouped = useMemo(() => {
-    if (!results.length) return {}
-    return results.reduce((acc, row) => {
+    if (!list.length) return {}
+    return list.reduce((acc, row) => {
       acc[row.schema] = acc[row.schema] || []
       acc[row.schema].push(row)
       return acc
     }, {})
-  }, [results])
-  console.log('grouped', grouped)
+  }, [list])
 
   const [selectedSchema, setSelectedSchema] = useState(null)
 
-  if (!results) return
+  if (!list || !list.length) return null
 
   return (
     <div className={styles.wrap}>
@@ -77,9 +82,7 @@ function AllEntities () {
         ))}
       </ul>
       <div>
-        {selectedSchema && (
-          <List list={grouped[selectedSchema]} />
-        )}
+        <List list={selectedSchema ? grouped[selectedSchema] : list} />
       </div>
     </div>
   )
@@ -96,7 +99,7 @@ function AllEntities () {
   // return <List list={results} />
 }
 
-function useListHeader (length) {
+function useListHeader () {
   const [count, setCount] = useDebouncedState(20, 20)
   const [offset, setOffset] = useDebouncedState(0, 20)
   // const [filter, setFilter] = useState(null, 50)
@@ -264,21 +267,21 @@ function Card (props) {
   )
 }
 
-function useQuery (query, args, opts) {
-  let querystring = ''
-  if (args) {
-    querystring = queryString.stringify(args)
-  }
-  const stream = useMemo(() => {
-    const websocket = ws(baseUrl + '/query/' + query + '?' + querystring)
-    const stream = ndjson(websocket)
-    return stream
-  }, [query, querystring])
-  // [list, length]
-  const ret = useReadable(stream, opts || {})
-  // console.log({ list, length })
-  return ret
-}
+// function useQuery (query, args, opts) {
+//   let querystring = ''
+//   if (args) {
+//     querystring = queryString.stringify(args)
+//   }
+//   const stream = useMemo(() => {
+//     const websocket = ws(baseUrl + '/query/' + query + '?' + querystring)
+//     const stream = ndjson(websocket)
+//     return stream
+//   }, [query, querystring])
+//   // [list, length]
+//   const ret = useReadable(stream, opts || {})
+//   // console.log({ list, length })
+//   return ret
+// }
 
 function ListOld (props) {
   const { list } = props
