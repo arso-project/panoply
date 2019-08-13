@@ -19,6 +19,10 @@ const fastify = require('fastify')({
 
 const store = makeStore('./data', { mappings })
 
+store.ready(() => {
+  log.info('Store ready: %s', store.key.toString('hex'))
+})
+
 fastify.register(require('./frontend/fastify'), {
   // prefix: '/ssr'
 })
@@ -74,7 +78,6 @@ fastify.get('/query/:name', { websocket: true }, (rawStream, req, params) => {
 
 fastify.listen(9191, 'localhost', (err) => {
   if (err) return console.error(err)
-  console.log(`Server listening on http://localhost:9191`)
 })
 
 function queryArgs (url) {
