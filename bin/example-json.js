@@ -7,7 +7,8 @@ const argv = minimist(process.argv.slice(2), {
   alias: {
     s: 'schema',
     f: 'from',
-    t: 'to'
+    t: 'to',
+    p: 'path'
   }
 })
 
@@ -21,6 +22,7 @@ Options:
   -s, --schema: Schema string
   -f, --from: Start index
   -t, --to: End index
+  -p, --path: JSON path
 `)
 }
 
@@ -31,7 +33,6 @@ if (!schema) exit('Schema is required.')
 if (!filename || !fs.existsSync(filename)) exit('File not found.')
 
 const baseUrl = 'http://localhost:9191'
-
 const batch = ndjson(ws(baseUrl + '/batch'))
 
 let json
@@ -41,6 +42,8 @@ try {
   exit('Invalid json.', err)
 }
 
+if (argv.path && !json[argv.path]) exit('Invalid JSON path')
+else if (argv.path) json = json[argv.path]
 if (!Array.isArray(json)) exit('Not an array.')
 
 json = json.slice(argv.from || 0, argv.to || undefined)
