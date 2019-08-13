@@ -71,7 +71,7 @@ class Store {
     // return promise
   }
 
-  querySlice (name, params, opts) {
+  querySlice (name, params, opts = {}) {
     const { count = 20, offset = 0 } = opts
     const query = this._makeQuery(name, params)
     const [promise, resolve] = makePromise()
@@ -157,9 +157,10 @@ if (!IS_SERVER) {
   window.__store__ = store
 }
 
-module.exports = { store, useQuery, useRecord }
+module.exports = { store, useQuery, useRecord, makeLink, parseLink }
 
 function useQuery (name, params) {
+  // if (IS_SERVER) return useSSRQuery(name, params)
   const [results, setResults] = useDebouncedResultState([], 100)
   useEffect(() => {
     const onchange = results => setResults(results.slice(0))
@@ -168,6 +169,15 @@ function useQuery (name, params) {
   }, [name, params])
   return results
 }
+
+// function useSSRQuery (name, params) {
+//   let promise = store.querySlice(name, params)
+//   let results
+//   promise.then(r => (results = r)).catch(e => (results = []))
+//   setTimeout(() => (results = []), 100)
+//   while (!results) {}
+//   return results
+// }
 
 function useDebouncedResultState (defaultValue, timeout = 30) {
   const [results, _setResults] = useState(defaultValue)

@@ -13,7 +13,13 @@ const routes = [
     path: '/debug',
     exact: true,
     component: require('./pages/debug.jsx')
+  },
+  {
+    path: '/importer',
+    component: require('./pages/importer.jsx'),
+    ssr: false
   }
+
 ]
 
 module.exports = routes

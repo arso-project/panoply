@@ -5,7 +5,18 @@ const html = require('../../html')
 
 function router (routes) {
   return async (fastify, opts) => {
-    for (const { path, exact, component } of routes) {
+    for (const { path, exact, component, ssr } of routes) {
+      if (ssr === false) {
+        fastify.get(path, async (request, reply) => {
+          const htmlString = html({
+            prefix: opts.prefix
+          })
+          reply.type('text/html')
+          reply.send(htmlString)
+        })
+        return
+      }
+
       if (exact !== true) {
         throw Error('All server routes should have exact:true to avoid partial matching.')
       }
