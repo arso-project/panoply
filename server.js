@@ -42,6 +42,28 @@ fastify.get('/get', { websocket: true }, (rawStream, req) => {
   pump(stream, getStream, stream)
 })
 
+fastify.get('/hyperdrive/writeFile/*', { websocket: true }, (rawStream, req, params) => {
+  const path = params['*']
+  // TODO: Check if path is valid.
+  // rawStream.on('data', d => console.log('data', d.toString()))
+  store.writer((err, drive) => {
+    if (err) return rawStream.destroy(err)
+    const ws = drive.createWriteStream(path)
+    rawStream.pipe(ws)
+  })
+})
+
+fastify.get('/hyperdrive/readFile/*', { websocket: true }, (rawStream, req, params) => {
+  const path = params['*']
+  // TODO: Check if path is valid.
+  // rawStream.on('data', d => console.log('data', d.toString()))
+  store.writer((err, drive) => {
+    if (err) return rawStream.destroy(err)
+    const rs = drive.createReadStream(path)
+    rs.pipe(rawStream)
+  })
+})
+
 fastify.get('/query/:name', { websocket: true }, (rawStream, req, params) => {
   const stream = ndjson(rawStream)
 
