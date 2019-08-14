@@ -1,4 +1,4 @@
-.wrap {
+.Wrap {
   display: grid;
   grid-template-columns: minmax(max-content, 1fr) 2fr;
   grid-gap: 1rem;
@@ -17,14 +17,14 @@
 }
 
 
-.list {
+.List {
   display: grid;
   max-width: 100%;
   grid-template-columns: 1fr 1fr;
   grid-gap: 1rem;
 }
 
-.card {
+.Card {
   max-width: 100%;
   overflow: hidden;
   /* background-color: hsl(var(--hue), 24%, 93%); */
@@ -76,7 +76,7 @@
 }
 
 
-.cardMeta {
+.Meta {
   display: grid;
   grid-template-columns: min-content 1fr;
   font-size: .8rem;

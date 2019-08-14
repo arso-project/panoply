@@ -27,7 +27,7 @@ export function GroupedList (props) {
   if (!list || !list.length) return null
 
   return (
-    <div className={styles.wrap}>
+    <div className={styles.Wrap}>
       <div>
         <ul>
           {Object.keys(grouped).map(schema => (
@@ -124,7 +124,7 @@ export function List (props) {
   return (
     <div>
       {header(list.length)}
-      <div className={styles.list}>
+      <div className={styles.List}>
         {slice.map((row, key) => (
           <RecordCard key={key} record={row} />
         ))}
@@ -216,7 +216,7 @@ function Meta (props) {
   if (stat) ctime = stat.ctime
 
   const meta = (
-    <dl className={styles.cardMeta}>
+    <dl className={styles.Meta}>
       <dt>Schema</dt>
       <dd>{schema}</dd>
       <dt>ID</dt>
@@ -342,7 +342,7 @@ function KeyValue (props) {
 function Card (props) {
   const { title, body, other, meta, link, thumbnail } = props
   return (
-    <article className={styles.card}>
+    <article className={styles.Card}>
       {link && <Link to={link}><h2>{title}</h2></Link>}
       {!link && <h2>{title}</h2>}
       {thumbnail && <img src={thumbnail} />}
