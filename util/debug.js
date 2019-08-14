@@ -1,4 +1,6 @@
-module.exports = { clock }
+module.exports = { clock, logEvents }
+const util = require('util')
+const log = require('../lib/log')
 
 function clock () {
   const [ss, sn] = process.hrtime()
@@ -10,5 +12,17 @@ function clock () {
     if (s > 1) return s + 's'
     if (ms) return ms + 'ms'
     if (ns) return ns + 'ns'
+  }
+}
+
+function logEvents (emitter, name) {
+  let emit = emitter.emit
+  emitter.emit = (...args) => {
+    // const params = args.slice(1).map(arg => {
+    //   util.inspect(arg, { depth: 0 })
+    // })
+    const params = util.inspect(args.slice(1), { depth: 0 })
+    log.debug('(%s) %s %o', name, args[0], params)
+    emit.apply(emitter, args)
   }
 }

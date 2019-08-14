@@ -3,6 +3,7 @@ const cstore = require('content-store')
 const mkdirp = require('mkdirp')
 const p = require('path')
 const util = require('util')
+const { logEvents } = require('./util/debug')
 
 const replicator = require('@hyperswarm/replicator')
 
@@ -53,17 +54,4 @@ function makeStore (basePath, opts) {
   })
 
   return store
-}
-
-
-function logEvents (emitter, name) {
-  let emit = emitter.emit
-  emitter.emit = (...args) => {
-    // const params = args.slice(1).map(arg => {
-    //   util.inspect(arg, { depth: 0 })
-    // })
-    const params = util.inspect(args.slice(1), { depth: 0 })
-    log.debug('(%s) %s %o', name, args[0], params)
-    emit.apply(emitter, args)
-  }
 }
