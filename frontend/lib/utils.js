@@ -67,17 +67,22 @@ function collectStream (stream, cb) {
   return ret
 }
 
-function useReadable (stream, opts) {
+function useReadable (stream, opts = {}) {
   // if (IS_SERVER) return useReadableSSR(stream, opts)
-  let { count = 20, offset = 0 } = opts
+  let { count = 20, offset = 0, reverse = false } = opts
 
   const buf = useMemo(() => [], [stream])
 
   const list = useMemo(() => {
     if (!count) return [...buf]
-    let slice = buf.slice(offset, offset + count)
+    let slice
+    if (!reverse) {
+      slice = buf.slice(offset, offset + count)
+    } else {
+      slice = buf.slice(buf.length - count - offset, buf.length - offset)
+    }
     return slice
-  }, [buf.length, count, offset])
+  }, [buf.length, count, offset, reverse])
 
   const debouncedUpdate = useDebouncedUpdate(100)
 

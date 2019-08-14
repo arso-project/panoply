@@ -16,7 +16,7 @@ function Wrapper (props) {
     <div ref={root} className={styles.root}>
       <nav className={styles.nav}>
         {link('/', 'Home')}
-        {link('/id/foo', 'Foo')}
+        {link('/importer', 'Importer')}
       </nav>
       <input type='range' onChange={onRangeChange} min={0} max={360} />
       <main>

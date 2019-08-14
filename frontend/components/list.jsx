@@ -126,7 +126,7 @@ export function List (props) {
       {header(list.length)}
       <div className={styles.list}>
         {slice.map((row, key) => (
-          <IntoCard key={key} record={row} />
+          <RecordCard key={key} record={row} />
         ))}
       </div>
     </div>
@@ -174,13 +174,46 @@ export function Table (props) {
   }
 }
 
-function IntoCard (props) {
+function EntityCard (props) {
+  const { record } = props
+  const { id, schema, value, stat } = record
+  const { label, files, origin } = value
+
+  let thumbnail
+  if (files) {
+    let thumbnails = files.filter(f => f.resourceType === 'thumbnail')
+    if (thumbnails.length) thumbnail = makeFileLink(thumbnails[0].link)
+  }
+
+  let renderedFiles = (
+    <ul>
+      {files.map((file, i) => (
+        <li key={i}>
+          <strong>{file.resourceType}</strong>
+          <a href={makeFileLink(file.link)}>{file.link}</a>
+        </li>
+      ))}
+    </ul>
+  )
+
+  return (
+    <Card
+      {...props}
+      body={(<div>
+        {renderedFiles}
+        <KeyValueObject data={origin} />
+      </div>)}
+      title={label}
+      thumbnail={thumbnail}
+    />
+  )
+}
+
+function Meta (props) {
   const { record } = props
   const { id, schema, value, stat } = record
   let ctime
   if (stat) ctime = stat.ctime
-
-  const link = '/id/' + id
 
   const meta = (
     <dl className={styles.cardMeta}>
@@ -196,6 +229,35 @@ function IntoCard (props) {
       )}
     </dl>
   )
+  return meta
+
+  function time (ts) {
+    const d = new Date(ts * 1000)
+    return d.toUTCString()
+  }
+}
+
+function RecordCard (props) {
+  const { record } = props
+  const { id, schema, value, stat } = record
+  const meta = <Meta record={record} />
+  const link = '/id/' + id
+  if (schema === 'arso.xyz/Entity') {
+    return <EntityCard record={record} meta={meta} link={link} />
+  } else {
+    return <UnknownCard record={record} meta={meta} link={link} />
+  }
+}
+
+function makeFileLink (path) {
+  return '/fs' + path
+}
+
+function UnknownCard (props) {
+  const { record } = props
+  const { id, schema, value, stat } = record
+
+  const link = '/id/' + id
 
   const fields = {
     title: ['title'],
@@ -225,13 +287,8 @@ function IntoCard (props) {
   }
 
   return (
-    <Card {...matches} other={others} meta={meta} link={link} />
+    <Card {...props} {...matches} other={others} link={link} />
   )
-
-  function time (ts) {
-    const d = new Date(ts * 1000)
-    return d.toUTCString()
-  }
 
   function toString (value) {
     if (typeof value === 'string' || typeof value === 'number') {
@@ -258,20 +315,41 @@ function forceToString (value) {
   } else return JSON.stringify(value)
 }
 
+function KeyValueObject (props) {
+  const { data } = props
+  let transformed = Object.entries(data).map(([key, value]) => ({
+    name: key,
+    value
+  }))
+  return <KeyValue data={transformed} />
+}
+
+function KeyValue (props) {
+  let { data } = props
+  if (!data) return null
+  return (
+    <dl className={styles.KeyValue}>
+      {data.map(({ name, value }) => (
+        <React.Fragment key={name}>
+          <dt>{name}</dt>
+          <dd>{value}</dd>
+        </React.Fragment>
+      ))}
+    </dl>
+  )
+}
+
 function Card (props) {
-  const { title, body, other, meta, link } = props
+  const { title, body, other, meta, link, thumbnail } = props
   return (
     <article className={styles.card}>
-      <Link to={link}><h2>{title}</h2></Link>
+      {link && <Link to={link}><h2>{title}</h2></Link>}
+      {!link && <h2>{title}</h2>}
+      {thumbnail && <img src={thumbnail} />}
       <main>{body}</main>
-      <dl>
-        {other.map(({ name, value }) => (
-          <React.Fragment key={name}>
-            <dt>{name}</dt>
-            <dd>{value}</dd>
-          </React.Fragment>
-        ))}
-      </dl>
+      <div>
+        { other && <KeyValue data={other} />}
+      </div>
       <footer>{meta}</footer>
     </article>
   )
