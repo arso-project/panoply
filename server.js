@@ -59,7 +59,6 @@ fastify.get('/get', { websocket: true }, (rawStream, req) => {
   pump(stream, getStream, stream)
 })
 
-
 fastify.get('/hyperdrive/writeFile/*', { websocket: true }, (rawStream, req, params) => {
   const path = params['*']
   // TODO: Check if path is valid.

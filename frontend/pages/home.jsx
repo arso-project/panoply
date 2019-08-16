@@ -10,7 +10,6 @@ const cn = require('classnames')
 
 const styles = require('./home.css')
 
-
 module.exports = Page
 
 function Page (props) {

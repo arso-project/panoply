@@ -28,7 +28,6 @@
 //   // return defaultValue
 // }
 
-
 // function useSSRTest () {
 //   if (IS_SERVER) {
 //     const result = useSSR(fetchData, 'SSR DEFAULT')
@@ -66,4 +65,3 @@
 //     })
 //   }
 // }
-
