@@ -157,7 +157,7 @@ if (!IS_SERVER) {
   window.__store__ = store
 }
 
-module.exports = { store, useQuery, useRecord, makeLink, parseLink }
+module.exports = { store, useQuery, useRecord, useCall, makeLink, parseLink }
 
 function useQuery (name, params) {
   // if (IS_SERVER) return useSSRQuery(name, params)
@@ -168,6 +168,16 @@ function useQuery (name, params) {
     return unsubscribe
   }, [name, params])
   return results
+}
+
+function useCall (name, params) {
+  const [result, setResult] = useState()
+  useEffect(() => {
+    const onchange = result => setResult(result && result.length ? result[0] : undefined)
+    const unsubscribe = store.query(name, params, onchange)
+    return unsubscribe
+  }, [name, params])
+  return result
 }
 
 // function useSSRQuery (name, params) {

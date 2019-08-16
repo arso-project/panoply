@@ -1,7 +1,7 @@
 // TODO: ES5 require.
 const React = require('react')
 const { useMemo, useEffect, useState, useCallback, useRef } = require('react')
-const { useQuery } = require('../lib/records.js')
+const { useQuery, useCall } = require('../lib/records.js')
 const Wrapper = require('../components/wrapper.jsx')
 
 const { GroupedList } = require('../components/list.jsx')
@@ -24,17 +24,33 @@ function Page (props) {
 
 function Search () {
   const [query, setQuery] = useState('')
-  const params = useMemo(() => ({ query }), [query])
+  const [index, setIndex] = useState('textdump')
+  const params = useMemo(() => ({
+    query,
+    index
+  }), [query, index])
   const results = useQuery('search.query', params)
+  const info = useCall('search.info') || {}
   // const onInputChange = useCallback(debounce(e => setQuery(e.target.value), 100), [])
   return (
     <div className={styles.wrap}>
       <div>
         <input type='text' onChange={e => setQuery(e.target.value)} />
+        <select value={index} onChange={e => setIndex(e.target.value)}>
+          {Object.entries(info).map(([name, info]) => (
+            <option key={name} value={name}>{schemaName(name)}</option>
+          ))}
+        </select>
       </div>
       <GroupedList list={results} />
     </div>
   )
+
+  // TODO: Make better & standardize.
+  function schemaName (schema) {
+    if (schema.indexOf('/') === -1) return schema
+    return schema.split('/')[1]
+  }
 }
 
 function AllEntities () {
