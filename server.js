@@ -33,21 +33,17 @@ fastify.register(require('fastify-websocket'))
 let hyperdriveRequestHandler = new Promise((resolve, reject) => {
   store.writer((err, drive) => {
     if (err) return reject(err)
-    console.log('DRIVE', drive.ready)
     const handler = hyperdriveHttp(drive)
     resolve(handler)
   })
 })
 fastify.get('/fs/*', (req, res) => {
-  const path = req.params['*']
+  // const path = req.params['*']
   hyperdriveRequestHandler.then(handler => {
-    console.log(path)
     const rawReq = req.req
-    console.log(rawReq.url)
-    rawReq.url = rawReq.url.substring(3)
+    rawReq.url = rawReq.url.substring(3) // remove /fs prefix
     handler(rawReq, res.res)
   })
-  // rawReq.url
 })
 
 fastify.get('/batch', { websocket: true }, (rawStream, req, params) => {
@@ -93,7 +89,7 @@ fastify.get('/query/:name', { websocket: true }, (rawStream, req, params) => {
   const { name } = params
   const args = queryArgs(req.url)
 
-  console.log('new connection', name, args)
+  log.info('query: %s %o', name, args)
 
   const [ view, method ] = name.split('.')
 
@@ -102,22 +98,44 @@ fastify.get('/query/:name', { websocket: true }, (rawStream, req, params) => {
     return stream.destroy(new Error('Invalid query name'))
   }
 
+  // TODO: Support higher-level key than api.manifest
+  let manifest
+  if (store.api[view].manifest) {
+    manifest = store.api[view].manifest[method] || store.api[view].manifest.default
+  }
+  if (!manifest) manifest = 'streaming'
+  if (typeof manifest !== 'object') manifest = { type: manifest }
+
   // TODO: Add safeguards / sanitze user input
   // or formalize query args in other ways.
-  const queryStream = store.api[view][method](args)
-  const getStream = store.createGetStream()
+  const result = store.api[view][method](args)
 
-  // TODO: Formalize this without special casing.
-  if (view === 'entities') {
-    pump(queryStream, getStream, collectStream(100), stream)
+  if (manifest.type === 'streaming') {
+    const transforms = []
+
+    // TODO: Formalize this without special casing.
+    if (view === 'entities') {
+      transforms.push(store.createGetStream())
+    }
+
+    transforms.push(collectStream(100))
+    pump(result, ...transforms, stream)
+  } else if (manifest.type === 'promise') {
+    result
+      .then(data => {
+        stream.write(data)
+        stream.end()
+      })
+      .catch(err => stream.destroy(err))
   } else {
-    pump(queryStream, collectStream(100), stream)
+    stream.destroy(new Error('Unsupported method: ' + name))
   }
 
   // TODO: Move to websocket middleware.
+  // TODO: Propagate errors somewhere else?
   stream.on('error', e => {
     if (e.code && e.code === 'ECONNRESET') return
-    console.error(e)
+    log.error(e)
   })
 })
 

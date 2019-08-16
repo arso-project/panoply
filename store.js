@@ -42,6 +42,7 @@ function makeStore (basePath, opts) {
       lookup: true
     })
     swarm.on('join', dkey => log.info('Joining swarm for %s', dkey.toString('hex')))
+    swarm.on('connection', peer => log.info('New peer'))
     store.sources(drives => {
       for (let drive of drives) {
         swarm.join(drive.discoveryKey)
@@ -50,7 +51,7 @@ function makeStore (basePath, opts) {
     store.on('source', drive => {
       swarm.join(drive.discoveryKey)
     })
-    logEvents(swarm, 'swarm')
+    // logEvents(swarm, 'swarm')
   })
 
   return store
