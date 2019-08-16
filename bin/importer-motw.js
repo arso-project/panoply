@@ -1,10 +1,3 @@
-
-// class FetchError extends CustomError {
-//   constructor () {
-//   }
-// }
-
-const log = require('../lib/log')
 const { Client, fetchJson } = require('../lib/client')
 
 async function importMotw (opts = {}) {
