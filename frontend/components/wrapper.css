@@ -3,36 +3,47 @@
   --color-border: hsl(var(--hue), 20%, 80%);
   --color-bg: hsl(var(--hue), 10%, 98%);
   --color-primary: hsl(var(--hue), 100%, 70%);
+
+  > main {
+    margin: 1rem 2rem;
+  }
 }
 
 .active {}
 
 .nav {
-  --border-style: 2px solid #fff;
+  margin: 1rem 2rem 0 2rem;
+  /* --border-style: 2px solid #fff; */
 
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 20rem);
-  grid-gap: 1rem;
-  padding: 1rem;
+  display: flex;
+  /* grid-template-columns: repeat(auto-fill, 20rem); */
+  /* grid-gap: 1rem; */
+  /* padding: 1rem; */
 
   > a {
     display: block;
-    border-right: var(--border-style);
-    background-color: var(--color-primary);
+    flex: 0;
+    margin-right: .5rem;
+    font-weight: bold;
+
+    /* border-right: var(--border-style); */
+    /* background-color: var(--color-primary); */
 
     &:last-child {
       border-right: none;
+      margin-right: none;
     }
-    flex: 1;
-    padding: .25rem;
+    /* flex: 1; */
+    /* padding: .25rem; */
     color: black;
     text-align: center;
     text-decoration: none;
     font-weight: bold;
     &.active,
     &:hover {
-      background-color: hsl(var(--hue), 100%, 40%);
-      color: white;
+      /* background-color: hsl(var(--hue), 100%, 40%); */
+      /* color: white; */
+      color: var(--color-primary);
     }
   }
 }

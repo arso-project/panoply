@@ -5,6 +5,11 @@ const routes = [
     component: require('./pages/home.jsx')
   },
   {
+    path: '/search',
+    exact: true,
+    component: require('./pages/search.jsx')
+  },
+  {
     path: '/id/:id',
     exact: true,
     component: require('./pages/id.jsx')

@@ -1,26 +1,31 @@
 .Wrap {
   display: grid;
-  grid-template-columns: minmax(max-content, 1fr) 2fr;
+  /* grid-template-columns: minmax(max-content, 1fr) 2fr; */
+  grid-template-columns: 200px 1fr;
   grid-gap: 1rem;
-  padding: 1rem;
+  /* padding: 1rem; */
 }
 
 .title {
-  font-size: 1.5rem;
+  /* font-size: 1.5rem; */
   color: hsl(var(--hue), 100%, 40%);
   cursor: pointer;
   transition: color .2s ease, background-color .2s ease;
-  padding: .5rem;
+  /* padding: .5rem; */
   &.active {
     background-color: hsla(var(--hue), 50%, 70%, 30%);
+  }
+  > em {
+    font-style: italic;
   }
 }
 
 
 .List {
+  --num-columns: 3;
   display: grid;
   max-width: 100%;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(var(--num-columns), 1fr);
   grid-gap: 1rem;
 }
 
@@ -42,11 +47,13 @@
   > h2,
   > a > h2 {
     padding-top: 1rem;
-    font-size: 2rem;
+    font-size: 1.5rem;
   }
 
   > main {
     flex: 1;
+    max-height: 200px;
+    overflow: hidden;
     /* font-size: 1.5rem; */
   }
 

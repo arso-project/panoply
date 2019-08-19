@@ -11,14 +11,14 @@ const styles = require('./wrapper.css')
 
 function Wrapper (props) {
   const { children } = props
-  const root = useRef()
+  const { ref, colorChanger } = useColorChanger()
   return (
-    <div ref={root} className={styles.root}>
+    <div ref={ref} className={styles.root}>
       <nav className={styles.nav}>
-        {link('/', 'Home')}
+        {link('/', 'Browse')}
+        {link('/search', 'Search')}
         {link('/importer', 'Importer')}
       </nav>
-      <input type='range' onChange={onRangeChange} min={0} max={360} />
       <main>
         {children}
       </main>
@@ -36,11 +36,19 @@ function Wrapper (props) {
     )
   }
 
+}
+
+function useColorChanger () {
+  const ref = useRef()
+  const colorChanger = (
+      <input type='range' onChange={onRangeChange} min={0} max={360} />
+  )
   function onRangeChange (e) {
-    if (!root.current) return
+    if (!ref.current) return
     const value = e.target.value
-    root.current.style.setProperty('--hue', value)
+    ref.current.style.setProperty('--hue', value)
   }
+  return { ref, colorChanger }
 }
 
 function CardExample () {

@@ -185,7 +185,7 @@ function EntityCard (props) {
     if (thumbnails.length) thumbnail = makeFileLink(thumbnails[0].link)
   }
 
-  let renderedFiles = (
+  let renderedFiles = !(files && files.length) ? null : (
     <ul>
       {files.map((file, i) => (
         <li key={i}>
@@ -317,6 +317,7 @@ function forceToString (value) {
 
 function KeyValueObject (props) {
   const { data } = props
+  if (typeof data !== 'object') return null
   let transformed = Object.entries(data).map(([key, value]) => ({
     name: key,
     value
