@@ -88,7 +88,7 @@ fastify.get('/query/:name', { websocket: true }, (rawStream, req, params) => {
   const { name } = params
   const args = queryArgs(req.url)
 
-  log.info('query: %s %o', name, args)
+  // log.info('query: %s %o', name, args)
 
   const [ view, method ] = name.split('.')
 

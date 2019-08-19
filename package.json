@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/arso-project/panoply#readme",
   "dependencies": {
-    "@archipel/sonar": "^0.1.0",
+    "@archipel/sonar": "^0.1.2",
     "@hyperswarm/replicator": "^1.1.0",
     "classnames": "^2.2.6",
     "content-store": "github:arso-project/content-store#master",
