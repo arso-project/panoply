@@ -5,9 +5,6 @@ const through = require('through2')
 const EOL = require('os').EOL
 const fastStringify = require('fast-safe-stringify')
 
-const { JSON_STRING } = require('content-store')
-console.log(JSON_STRING)
-
 module.exports = function ndjsonDuplexStream (stream) {
   // const input = ndjson.stringify()
   const input = stringify()

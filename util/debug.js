@@ -21,8 +21,17 @@ function logEvents (emitter, name) {
     // const params = args.slice(1).map(arg => {
     //   util.inspect(arg, { depth: 0 })
     // })
-    const params = util.inspect(args.slice(1), { depth: 0 })
-    log.debug('(%s) %s %o', name, args[0], params)
+    let params
+    if (args.length === 2 && Buffer.isBuffer(args[1])) {
+      if (args[1].length === 32) {
+        params = `[ <BUF ${args[1].toString('hex')}> ]`
+      } else {
+        params = `[ <BUF (${args[1].length})> ]`
+      }
+    } else {
+      params = util.inspect(args.slice(1), { depth: 0 })
+    }
+    log.debug('(%s) %s', name, args[0], params)
     emit.apply(emitter, args)
   }
 }
