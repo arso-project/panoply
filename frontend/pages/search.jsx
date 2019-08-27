@@ -3,7 +3,7 @@ const { useMemo, useEffect, useState, useCallback, useRef } = require('react')
 const { useQuery, useCall } = require('../lib/records.js')
 const Wrapper = require('../components/wrapper.jsx')
 
-const { Link } = require('react-router-dom')
+const { Link } = require('../components/link.jsx')
 const { List } = require('../components/list.jsx')
 const { makeLink } = require('../lib/records.js')
 
@@ -61,7 +61,6 @@ function SearchList (props) {
 
 function Row (props) {
   const { record } = props
-  console.log(record)
   return (
     <div className={styles.Row}>
       <h2>

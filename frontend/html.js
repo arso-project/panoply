@@ -14,13 +14,13 @@ module.exports = function (opts) {
     .join('')
 
   const head = [
-    `<link rel="stylesheet" href="${link('/main.css')}">`,
-    `<link rel="stylesheet" href="${link('/fonts/iAQuattro/ia-quattro.css')}">`,
+    `<link rel="stylesheet" href="${link('/dist/main.css')}">`,
+    `<link rel="stylesheet" href="${link('/dist/fonts/iAQuattro/ia-quattro.css')}">`,
     ...opts.head
   ].join('')
 
   const footer = [
-    `<script src="${link('/main.js')}" defer></script>`,
+    `<script src="${link('/dist/main.js')}" defer></script>`,
     ...opts.footer
   ].join('')
 
@@ -36,12 +36,15 @@ module.exports = function (opts) {
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta id="theme-color" name="theme-color" content="#f0c">
-    <link rel="manifest" href="${link('/manifest.json')}">
-    <link rel="shortcut icon" href="${link('/favicon.png')}" sizes="144x144" type="image/png">
+    <!-- <link rel="manifest" href="${link('/dist/manifest.json')}"> -->
+    <!-- <link rel="shortcut icon" href="${link('/dist/favicon.png')}" sizes="144x144" type="image/png"> -->
     ${head}
   </head>
   <body>
     <div id="root">${main}</div>
+    <script>
+      window.__archipel = ${JSON.stringify(opts)}
+    </script>
     ${footer}
   </body>
 </html>

@@ -1,6 +1,6 @@
 const React = require('react')
 const { useRef } = require('react')
-const { NavLink } = require('react-router-dom')
+const { Link } = require('./link.jsx')
 const { Cards } = require('./cards.jsx')
 
 module.exports = Wrapper
@@ -15,33 +15,21 @@ function Wrapper (props) {
   return (
     <div ref={ref} className={styles.root}>
       <nav className={styles.nav}>
-        {link('/', 'Browse')}
-        {link('/search', 'Search')}
-        {link('/importer', 'Importer')}
+        <Link to='/'>Browse</Link>
+        <Link to='/search'>Search</Link>
+        <Link to='/importer'>Importer</Link>
       </nav>
       <main>
         {children}
       </main>
     </div>
   )
-
-  function link (to, text) {
-    return (
-      <NavLink
-        to={to}
-        exact
-        activeClassName={styles.active}>
-        {text}
-      </NavLink>
-    )
-  }
-
 }
 
 function useColorChanger () {
   const ref = useRef()
   const colorChanger = (
-      <input type='range' onChange={onRangeChange} min={0} max={360} />
+    <input type='range' onChange={onRangeChange} min={0} max={360} />
   )
   function onRangeChange (e) {
     if (!ref.current) return

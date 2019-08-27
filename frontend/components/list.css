@@ -29,6 +29,27 @@
   grid-gap: 1rem;
 }
 
+.RecordSetCard {
+  padding: 0;
+  > nav {
+    background: hsla(var(--hue), 50%, 80%, 50%);
+    border-bottom: 1px solid hsla(var(--hue), 80%, 40%, 20%);
+    display: flex;
+    > a {
+      cursor: pointer;
+      display: block;
+      padding: .25rem;
+      font-weight: bold;
+      flex: 0;
+      &.active {
+        color: hsl(var(--hue), 100%, 50%);
+      }
+    }
+  }
+}
+
+.active {}
+
 .Card {
   max-width: 100%;
   overflow: hidden;
@@ -36,30 +57,35 @@
   border: 1px solid hsla(var(--hue), 80%, 40%, 20%);
   display: flex;
   flex-direction: column;
-  > * {
-    padding: 0 1rem;
-  }
-  > a {
-    text-decoration: none;
-    color: black;
-  }
-
-  > h2,
-  > a > h2 {
-    padding-top: 1rem;
-    font-size: 1.5rem;
-  }
 
   > main {
+    padding: 0 1rem;
+
     flex: 1;
     max-height: 200px;
     overflow: hidden;
+
+    &.full {
+      max-height: auto;
+    }
     /* font-size: 1.5rem; */
+    > a {
+      text-decoration: none;
+      color: black;
+    }
+
+    > h2,
+    > a > h2 {
+      padding-top: 1rem;
+      font-size: 1.5rem;
+    }
   }
 
   > footer {
+    padding: 0 1rem;
     margin-top: 1rem;
     background-color: hsl(var(--hue), 24%, 93%);
+    opacity: .8;
     /* background-color: hsl(var(--hue), 10%, 85%); */
   }
 
@@ -85,12 +111,20 @@
 
 .Meta {
   display: grid;
-  grid-template-columns: min-content 1fr;
+  grid-template-columns: 1fr max-content;
   font-size: .8rem;
-  padding: 1rem 0;
+  /* line-height: 1.2; */
+  padding: .5rem 0;
+  color: hsl(var(--hue), 10%, 10%);
+
+  > dd {
+  }
 
   > dt {
-    font-weight: bold;
+    display: none;
+    /* font-weight: bold; */
+    color: #222;
+    /* font-style: italic; */
     padding-right: 1rem;
   }
 }

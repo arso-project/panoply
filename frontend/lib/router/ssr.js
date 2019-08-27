@@ -7,6 +7,7 @@ function router (routes) {
   return async (fastify, opts) => {
     for (const { path, exact, component, ssr } of routes) {
       if (ssr === false) {
+        console.log('INIT', path, ssr)
         fastify.get(path, async (request, reply) => {
           const htmlString = html({
             prefix: opts.prefix

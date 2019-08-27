@@ -1,5 +1,6 @@
 const React = require('react')
 const { hydrate } = require('react-dom')
+const { Route } = require('react-router')
 const { BrowserRouter } = require('react-router-dom')
 const { renderRoutes } = require('react-router-config')
 const production = process.env.NODE_ENV === 'production'
@@ -9,7 +10,8 @@ const logger = require('pino')({
   level: production ? 'silent' : 'info'
 })
 
-function LoggingRouter ({ history, children }) {
+function LoggingRouter (props) {
+  const { prefix = '', history, children } = props
   return (
     <BrowserRouter history={history} logger={logger}>
       {children}
@@ -17,11 +19,17 @@ function LoggingRouter ({ history, children }) {
   )
 }
 
-function router (routes = []) {
+function router (routes = [], opts = {}) {
   return async (mount) => {
     if (routes.length === 0) return
+    if (opts.prefix) {
+      routes = routes.map(route => {
+        route.path = opts.prefix + route.path
+        return route
+      })
+    }
     hydrate(
-      <LoggingRouter>
+      <LoggingRouter prefix={opts.prefix}>
         {renderRoutes(routes)}
       </LoggingRouter>
       , mount)

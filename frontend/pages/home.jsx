@@ -21,9 +21,9 @@ function Page (props) {
 
 function AllEntities () {
   const results = useQuery('entities.all')
-  useEffect(() => {
-    if (results.length === 0) console.time('entities')
-    if (results.length >= 1000) console.timeEnd('entities')
-  }, [results.length])
+  // useEffect(() => {
+  //   // if (results.length === 0) console.time('entities')
+  //   // if (results.length >= 1000) console.timeEnd('entities')
+  // }, [results.length])
   return <GroupedList list={results} />
 }

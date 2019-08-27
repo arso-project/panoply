@@ -8,8 +8,14 @@ const mirror = require('mirror-folder')
 const html = require('./html.js')
 
 const argv = minimist(process.argv.slice(2), {
-  alias: { w: 'watch' }
+  default: {
+    'server': true
+  },
+  alias: {
+    w: 'watch'
+  }
 })
+console.log(argv)
 
 const BUILD_PATH = p.join(__dirname, 'dist')
 
@@ -35,14 +41,17 @@ function run (opts) {
     css: true
   })
 
-  const entryServer = p.join(__dirname, 'main-ssr.js')
-  const server = makeBrowserify(entryServer, {
-    bare: true,
-    node: true,
-    bundleExternal: false,
-    standalone: 'panoply.frontend',
-    tinify: false
-  })
+  let server
+  if (opts.server) {
+    let entryServer = p.join(__dirname, 'main-ssr.js')
+    server = makeBrowserify(entryServer, {
+      bare: true,
+      node: true,
+      bundleExternal: false,
+      standalone: 'panoply.frontend',
+      tinify: false
+    })
+  }
 
   if (opts.watch) {
     browser.plugin(require('watchify'))
@@ -83,11 +92,13 @@ function run (opts) {
       .on('end', () => console.log(`browser build finished, written: ${rel(browserPath)}`))
       .pipe(fs.createWriteStream(browserPath))
 
-    let serverPath = p.join(BUILD_PATHS.ssr, 'main.js')
-    server.bundle()
-      .on('error', e => console.error(String(e)))
-      .on('end', () => console.log(`server build finished, written: ${rel(serverPath)}`))
-      .pipe(fs.createWriteStream(serverPath))
+    if (server) {
+      let serverPath = p.join(BUILD_PATHS.ssr, 'main.js')
+      server.bundle()
+        .on('error', e => console.error(String(e)))
+        .on('end', () => console.log(`server build finished, written: ${rel(serverPath)}`))
+        .pipe(fs.createWriteStream(serverPath))
+    }
   }
 }
 

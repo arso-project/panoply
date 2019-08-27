@@ -3,7 +3,7 @@ const React = require('react')
 const { useMemo, useEffect, useState, useCallback, useRef } = require('react')
 
 const { useDebouncedState, IS_SERVER } = require('../lib/utils.js')
-const { Link } = require('react-router-dom')
+const { Link } = require('./../components/link.jsx')
 const { makeLink } = require('../lib/records.js')
 
 const cn = require('classnames')
@@ -51,10 +51,6 @@ export function GroupedList (props) {
       </div>
     </div>
   )
-
-  function schemaName (schema) {
-    return schema.split('/')[1]
-  }
 
   function toggleSchema (schema) {
     setSelectedSchema(s => s === schema ? null : schema)
@@ -126,7 +122,7 @@ export function List (props) {
       {header(list.length)}
       <div className={styles.List}>
         {slice.map((row, key) => (
-          <RecordCard key={key} record={row} />
+          <RecordSetCard key={key} records={row} />
         ))}
       </div>
     </div>
@@ -174,7 +170,7 @@ export function Table (props) {
   }
 }
 
-function EntityCard (props) {
+export function EntityCard (props) {
   const { record } = props
   const { id, schema, value, stat } = record
   const { label, files, origin } = value
@@ -218,7 +214,7 @@ function Meta (props) {
   const meta = (
     <dl className={styles.Meta}>
       <dt>Schema</dt>
-      <dd>{schema}</dd>
+      <dd>{schemaName(schema)}</dd>
       <dt>ID</dt>
       <dd>{id}</dd>
       {ctime && (
@@ -237,15 +233,41 @@ function Meta (props) {
   }
 }
 
+export function RecordSetCard (props) {
+  const [idx, setIdx] = useState(0)
+
+  const { records, ...other } = props
+  if (!Array.isArray(records)) return <RecordCard record={records} />
+  if (records.length === 1) {
+    return <RecordCard record={records[0]} />
+  }
+
+  const header = (
+    <div className={styles.RecordSetCard}>
+      <nav>
+        {records.map((record, i) => (
+          <a key={i}
+            className={cn({ [styles.active]: i === idx })}
+            onClick={e => setIdx(i)}>
+            {i + 1}
+          </a>
+        ))}
+      </nav>
+    </div>
+  )
+
+  return <RecordCard {...other} record={records[idx]} header={header} />
+}
+
 function RecordCard (props) {
   const { record } = props
   const { id, schema, value, stat } = record
   const meta = <Meta record={record} />
   const link = '/id/' + id
   if (schema === 'arso.xyz/Entity') {
-    return <EntityCard record={record} meta={meta} link={link} />
+    return <EntityCard {...props} record={record} meta={meta} link={link} />
   } else {
-    return <UnknownCard record={record} meta={meta} link={link} />
+    return <UnknownCard {...props} record={record} meta={meta} link={link} />
   }
 }
 
@@ -255,7 +277,7 @@ function makeFileLink (path) {
 
 function UnknownCard (props) {
   const { record } = props
-  const { id, schema, value, stat } = record
+  const { id, schema, value = {}, stat } = record
 
   const link = '/id/' + id
 
@@ -341,17 +363,25 @@ function KeyValue (props) {
 }
 
 function Card (props) {
-  const { title, body, other, meta, link, thumbnail } = props
+  const { title, body, other, meta, link, thumbnail, header, mode } = props
   return (
-    <article className={styles.Card}>
-      {link && <Link to={link}><h2>{title}</h2></Link>}
-      {!link && <h2>{title}</h2>}
-      {thumbnail && <img src={thumbnail} />}
-      <main>{body}</main>
-      <div>
-        { other && <KeyValue data={other} />}
-      </div>
+    <article className={cn(styles.Card, mode)}>
+      {header && header}
+      <main>
+        {link && <Link to={link}><h2>{title}</h2></Link>}
+        {!link && <h2>{title}</h2>}
+        {thumbnail && <img src={thumbnail} />}
+        <main>{body}</main>
+        <div>
+          { other && <KeyValue data={other} />}
+        </div>
+      </main>
       <footer>{meta}</footer>
     </article>
   )
 }
+
+function schemaName (schema) {
+  return schema.split('/')[1]
+}
+
