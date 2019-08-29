@@ -1,5 +1,5 @@
 const leveldb = require('level')
-const cstore = require('content-store')
+const hypercontent = require('hyper-content-db')
 const mkdirp = require('mkdirp')
 const p = require('path')
 const util = require('util')
@@ -7,7 +7,7 @@ const exitHook = require('async-exit-hook')
 const { logEvents } = require('./util/debug')
 
 const hyperswarm = require('@hyperswarm/replicator')
-const hyperdiscovery = require('hyperdiscovery')
+// const hyperdiscovery = require('hyperdiscovery')
 
 const mapView = require('./lib/view-mapping')
 const sonarView = require('./lib/view-sonar')
@@ -30,7 +30,7 @@ function makeStore (opts = {}) {
   Object.values(paths).forEach(p => mkdirp.sync(p))
 
   const level = leveldb(paths.level, 'level')
-  const store = cstore(paths.corestore, opts.key, {
+  const store = hypercontent(paths.corestore, opts.key, {
     level,
     sparse: false
   })
@@ -50,7 +50,7 @@ function makeStore (opts = {}) {
 
 function replicate (store) {
   store.ready(() => {
-    // replicateHyperswarm(store)
+    replicateHyperswarm(store)
     // replicateHyperdiscovery(store)
     replicateLocal(store)
   })
@@ -162,18 +162,18 @@ function replicateHyperswarm (store) {
   logEvents(swarm, 'hyperswarm')
 }
 
-function replicateHyperdiscovery (store) {
-  const swarm = hyperdiscovery(store)
-  store.sources(drives => {
-    for (let drive of drives) {
-      swarm.add(drive)
-    }
-  })
-  // store.on('source', drive => {
-  //   swarm.add(drive)
-  // })
-  logEvents(swarm, 'hyperdiscovery')
-}
+// function replicateHyperdiscovery (store) {
+//   const swarm = hyperdiscovery(store)
+//   store.sources(drives => {
+//     for (let drive of drives) {
+//       swarm.add(drive)
+//     }
+//   })
+//   // store.on('source', drive => {
+//   //   swarm.add(drive)
+//   // })
+//   logEvents(swarm, 'hyperdiscovery')
+// }
 
 function once (fn) {
   let wrapper = (...args) => {
