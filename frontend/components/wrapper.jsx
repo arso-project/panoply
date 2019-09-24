@@ -18,6 +18,7 @@ function Wrapper (props) {
         <Link to='/'>Browse</Link>
         <Link to='/search'>Search</Link>
         <Link to='/importer'>Importer</Link>
+        <Link to='/add'>Add</Link>
       </nav>
       <main>
         {children}
