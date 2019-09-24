@@ -23,8 +23,15 @@ const routes = [
     path: '/importer',
     component: require('./pages/importer.jsx'),
     ssr: false
+  },
+  {
+    path: '/add',
+    component: require('./pages/add.jsx').default,
+    ssr: false
   }
 
 ]
+
+console.log(routes)
 
 module.exports = routes

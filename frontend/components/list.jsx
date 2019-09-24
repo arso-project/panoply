@@ -199,13 +199,13 @@ export function EntityCard (props) {
         {renderedFiles}
         <KeyValueObject data={origin} />
       </div>)}
-      title={label}
+      title={label || id}
       thumbnail={thumbnail}
     />
   )
 }
 
-function Meta (props) {
+export function Meta (props) {
   const { record } = props
   const { id, schema, value, stat } = record
   let ctime
@@ -259,7 +259,7 @@ export function RecordSetCard (props) {
   return <RecordCard {...other} record={records[idx]} header={header} />
 }
 
-function RecordCard (props) {
+export function RecordCard (props) {
   const { record } = props
   const { id, schema, value, stat } = record
   const meta = <Meta record={record} />
@@ -362,7 +362,7 @@ function KeyValue (props) {
   )
 }
 
-function Card (props) {
+export function Card (props) {
   const { title, body, other, meta, link, thumbnail, header, mode } = props
   return (
     <article className={cn(styles.Card, mode)}>

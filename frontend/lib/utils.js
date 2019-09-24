@@ -123,7 +123,10 @@ function useUpdate () {
   const [counter, setCounter] = useState(0)
   return update
   function update () {
-    setCounter(c => c + 1)
+    setCounter(c => {
+      console.log('c', c)
+      return c + 1
+    })
   }
 }
 
