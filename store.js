@@ -4,6 +4,7 @@ const mkdirp = require('mkdirp')
 const p = require('path')
 const util = require('util')
 const exitHook = require('async-exit-hook')
+const localSocketStream = require('./lib/local-socket-stream.js')
 const { logEvents } = require('./util/debug')
 
 const hyperswarm = require('@hyperswarm/replicator')
@@ -50,7 +51,7 @@ function makeStore (opts = {}) {
 
 function replicate (store) {
   store.ready(() => {
-    replicateHyperswarm(store)
+    // replicateHyperswarm(store)
     // replicateHyperdiscovery(store)
     replicateLocal(store)
   })
@@ -64,83 +65,13 @@ function replicate (store) {
 // replication stream is passed into it, unencrypted.
 // Note that discovery keys are not respected.
 function replicateLocal (store) {
-  // const dkey = store.discoveryKey.toString('hex')
-  // console.log('dkey', dkey)
-
-  const net = require('net')
-  const fs = require('fs')
-  const sockPath = '/tmp/archipel.sock'
-  const pidPath = '/tmp/archipel.pid'
-
-  const cb = err => console.error('repl ERROR', err)
-  const replOpts = { live: true, encrypt: false }
-
-  startLocalReplication(cb)
-
-  function startLocalReplication (cb) {
-    fs.readFile(pidPath, (err, buf) => {
-      if (err) return startServer(cb)
-      let pid = parseInt(buf.toString())
-      console.log('readFile', pid)
-      try {
-        process.kill(pid, 0)
-        console.log('pid ok')
-        startClient(cb)
-      } catch (err) {
-        console.log('pid bad')
-        fs.unlink(sockPath, (err) => {
-          if (err && err.code !== 'ENOENT') return cb(err)
-          startServer(cb)
-        })
-      }
-    })
-
-    function startServer () {
-      const pidbuf = Buffer.from(String(process.pid))
-      // const shutdown = once(shutdownServer)
-      console.log('start server')
-      fs.writeFile(pidPath, pidbuf, err => {
-        if (err) return cb(err)
-
-        exitHook(shutdownServer)
-
-        // Start server.
-        const server = net.createServer(onstream)
-        server.listen(sockPath)
-        server.on('error', err => console.error('server ERROR', err))
-        function onstream (stream) {
-          replicate(stream)
-          stream.on('error', err => console.error('server stream ERROR', err))
-        }
-      })
-    }
-
-    function shutdownServer () {
-      try {
-        fs.unlinkSync(pidPath)
-        fs.unlinkSync(sockPath)
-      } catch (e) {}
-    }
-
-    function startClient () {
-      console.log('start client')
-      const stream = net.connect(sockPath)
-      replicate(stream)
-      stream.once('data', () => console.log('client OK'))
-      stream.on('error', err => console.error('client stream ERROR', err))
-      stream.on('end', () => setTimeout(() => startLocalReplication(cb), 100))
-    }
-
-    function replicate (stream) {
-      const repl = store.replicate(replOpts)
-      // logEvents(repl, 'repl')
-      stream.pipe(repl).pipe(stream)
-      repl.on('error', err => {
-        console.error('client repl ERR', err)
-        stream.destroy(err)
-      })
-    }
-  }
+  // const name = 'archipel-' + store.discoveryKey.toString('hex')
+  const name = 'archipel-replication'
+  localSocketStream(name, (err, stream) => {
+    if (err) return console.error('cannot setup local replication: ', err)
+    const repl = store.replicate({ encrypt: false, live: true })
+    repl.pipe(stream).pipe(repl)
+  })
 }
 
 function replicateHyperswarm (store) {
