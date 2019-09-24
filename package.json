@@ -32,7 +32,7 @@
     "fastify": "^2.7.0",
     "fastify-static": "^2.5.0",
     "fastify-websocket": "^0.6.0",
-    "hyper-content-db": "^0.1.0",
+    "hyper-content-db": "^0.1.1",
     "hyperdrive-http": "^4.4.0",
     "json-schema-generator": "^2.0.6",
     "level": "^5.0.1",
