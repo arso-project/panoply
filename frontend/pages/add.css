@@ -13,7 +13,7 @@
     > li {
       display: contents;
       > * {
-        padding: .5rem;
+        /* padding: .5rem; */
       }
     }
   }

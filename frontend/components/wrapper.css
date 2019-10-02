@@ -4,6 +4,9 @@
   --color-bg: hsl(var(--hue), 10%, 98%);
   --color-primary: hsl(var(--hue), 100%, 70%);
 
+  display: grid;
+  grid-template-columns: 10rem 1fr;
+
   > main {
     margin: 1rem 2rem;
   }
@@ -12,10 +15,11 @@
 .active {}
 
 .nav {
-  margin: 1rem 2rem 0 2rem;
-  /* --border-style: 2px solid #fff; */
+  /* margin: 1rem 2rem 0 2rem; */
+  /* display: flex; */
+  margin: 1rem;
 
-  display: flex;
+  /* --border-style: 2px solid #fff; */
   /* grid-template-columns: repeat(auto-fill, 20rem); */
   /* grid-gap: 1rem; */
   /* padding: 1rem; */
@@ -36,7 +40,7 @@
     /* flex: 1; */
     /* padding: .25rem; */
     color: black;
-    text-align: center;
+    /* text-align: center; */
     text-decoration: none;
     font-weight: bold;
     &.active,

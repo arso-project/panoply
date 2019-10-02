@@ -19,7 +19,7 @@ function IdPage (props) {
 
   return (
     <Wrapper>
-      <RecordSetCard records={results} mode={'full'} />
+      <RecordSetCard records={results} viewMode='full' />
     </Wrapper>
   )
 }

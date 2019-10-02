@@ -363,9 +363,9 @@ function KeyValue (props) {
 }
 
 export function Card (props) {
-  const { title, body, other, meta, link, thumbnail, header, mode } = props
+  const { title, body, other, meta, link, thumbnail, header, viewMode } = props
   return (
-    <article className={cn(styles.Card, mode)}>
+    <article className={cn(styles.Card, { [styles.full]: viewMode === 'full' })}>
       {header && header}
       <main>
         {link && <Link to={link}><h2>{title}</h2></Link>}

@@ -6,12 +6,18 @@ import { EventEmitter } from 'events'
 import { RecordCard, Card, Meta } from '../components/list.jsx'
 import { useUpdate } from '../lib/utils'
 import cn from 'classnames'
+import { Readable } from 'stream'
 
 // GLOBALS (have to move)
 
 const entitySchema = {
+  $id: 'arso.xyz/Entity',
+  label: 'Entity',
   properties: {
-    label: { type: 'string', description: 'Label' },
+    label: {
+      type: 'string',
+      description: 'Label'
+    },
     description: { type: 'string', description: 'Description' },
     resources: {
       type: 'array',
@@ -23,6 +29,16 @@ const entitySchema = {
   }
 }
 
+const videoSchema = {
+  $id: 'arso.xyz/Video',
+  label: 'Video',
+  refines: 'arso.xyz/Entity',
+  properties: {
+    primaryResource: { type: 'relation', description: 'Primary video resource' },
+    derivedResources: { type: 'array', items: { type: 'relation' } },
+  }
+}
+
 let store
 function getStore () {
   if (!store) store = new ResourceStore()
@@ -30,26 +46,27 @@ function getStore () {
 }
 
 export default function AddPage (props) {
-  const [show, setShow] = useState(true)
   return (
     <Wrapper>
       <h1>Add files</h1>
-      <h3 onClick={e => setShow(s => !s)}>{show ? 'hide' : 'show'}</h3>
-      {show && <UploadFile />}
+      <UploadFile />
     </Wrapper>
   )
 }
 
 function UploadFile (props) {
-  const [fileList, setFileList] = useState([])
+  // const [fileList, setFileList] = useState([])
   const [selectedFile, selectFile] = useState(null)
+  const fileList = getStore().draftFiles || []
+  const inputValue = fileList.map(f => f.domFile)
+  const triggerUpdate = useUpdate()
 
   console.log('render', fileList)
   return (
     <div className={styles.Page}>
       <nav>
         <form>
-          <input type='file' onChange={onFileInputChange} multiple />
+          <input files={inputValue} type='file' onChange={onFileInputChange} multiple />
         </form>
         <ul className={styles.FileList}>
           {fileList.map((file, i) => (
@@ -58,12 +75,40 @@ function UploadFile (props) {
             </li>
           ))}
         </ul>
+        {fileList.length && <button onClick={e => onUploadStart()}>Upload</button>}
       </nav>
       <div>
         {selectedFile && <ResourceFromFile file={selectedFile} />}
       </div>
     </div>
   )
+
+  function onUploadStart () {
+    const chunkSize = 1024 * 1024
+    let offset = 0
+    for (const file of fileList) {
+      const domFile = file.domFile
+      const fileReader = new FileReader(domFile)
+      const stream = new Readable({
+        read () {
+          if (offset > file.size) {
+            this.push(null)
+          }
+          const end = offset + chunkSize
+          const slice = domFile.slice(offset, offset + chunkSize)
+          fileReader.readAsArrayBuffer(slice)
+          offset = end
+        }
+      })
+      fileReader.onloadend = function loaded (event) {
+        var data = event.target.result
+        if (data instanceof ArrayBuffer) data = Buffer.from(new Uint8Array(event.target.result))
+        stream.push(data)
+      }
+      stream.on('data', d => console.log('DATA', file.name, d))
+      stream.on('end', () => console.log('END', file.name))
+    }
+  }
 
   function onFileInputChange (e) {
     const fileList = e.target.files
@@ -75,14 +120,17 @@ function UploadFile (props) {
         id: generate(),
         name: file.webkitRelativePath || file.name,
         size: file.size,
+        domFile: file,
         pending: false,
         done: false,
         written: 0,
         speed: 0
       })
     }
+    getStore().setDraftFiles(files)
+    triggerUpdate()
     console.log('files', files)
-    setFileList(files)
+    // setFileList(files)
   }
 }
 
@@ -124,7 +172,9 @@ function Resource (props) {
         </li>
         <li>
           <em>Extract Metadata</em>
-          <button onClick={e => {}}>Auto-detect extractor and run</button>
+          <span>
+            <button onClick={e => {}}>Auto-detect extractor and run</button>
+          </span>
         </li>
       </ul>
       <Records resource={resource} />
@@ -144,22 +194,32 @@ function Records (props) {
     return () => store.removeListener('update', triggerUpdate)
   }, [])
   const records = store.getRecordsForResource(resource)
-  console.log('RECORDS', records)
 
   const createEntity = (
     <div>
       <a onClick={e => store.createEntityForResource(resource)}>
         Create new entity
-      </a> or <a>add to existing entity</a>
+      </a>
+      <span> or </span>
+      <a>add to existing entity</a>
     </div>
   )
 
   if (!records.length) return createEntity
 
+  const schemas = store.getSchemas()
+
   return (
     <div>
-      {createEntity}
       <RecordList records={records} onChange={onRecordChange} />
+      <div>
+        Add schema:
+        <div>
+          {schemas.map((schema, i) => (
+            <a key={i} onClick={e => store.createRecordForResource(schema.$id, resource)}>{schema.label}</a>)
+          )}
+        </div>
+      </div>
     </div>
   )
 
@@ -184,16 +244,45 @@ function RecordList (props) {
 
 function componentForRecord (record) {
   const components = {
-    'arso.xyz/Entity': Entity
+    'arso.xyz/Entity': Entity,
+    default: RecordForm
   }
   if (components[record.schema]) return components[record.schema]
   else return components.default
 }
 
+function RecordForm (props) {
+  const { record, onChange } = props
+  const { schema, source, id, value } = record
+  const store = getStore()
+
+  const fields = jsonSchemaToFields(store.getSchema(schema), {
+    // include: ['label', 'description']
+  })
+  const body = (
+    <Form fields={fields} value={value} onChange={onFormChange} />
+  )
+
+  function onFormChange (newValue) {
+    const newRecord = { ...record, value: newValue }
+    console.log('setValue', newRecord)
+    onChange(newRecord)
+  }
+
+  return (
+    <Card
+      meta={<Meta record={record} />}
+      body={body}
+    />
+  )
+}
+
+
 function Entity (props) {
   const { record, onChange } = props
   console.log('Entity', record)
   const { source, schema, id, value } = record
+
   const fields = jsonSchemaToFields(entitySchema, {
     include: ['label', 'description']
   })
@@ -210,7 +299,6 @@ function Entity (props) {
   return (
     <Card
       meta={<Meta record={record} />}
-      header={id}
       body={body}
     />
   )
@@ -274,11 +362,20 @@ function StringWidget (props) {
 }
 
 function UnsuportedWidget (props) {
+  const value = props.value || ''
+
   return (
     <span>
       <em>Not supported</em>
+      <span>{forceToString(value)}</span>
     </span>
   )
+
+  function forceToString (value) {
+    if (typeof value === 'string' || typeof value === 'number') {
+      return String(value)
+    } else return JSON.stringify(value)
+  }
 }
 
 class ResourceStore extends EventEmitter {
@@ -293,8 +390,14 @@ class ResourceStore extends EventEmitter {
 
   getRecordsForResource (resource) {
     if (this.recordsByResource[resource.id]) {
-      return [...this.recordsByResource[resource.id]].map(id => this.records[id])
+      return [...this.recordsByResource[resource.id]].map(link => this.records[link])
     } else return []
+  }
+
+  getEntityIdForResource (resource) {
+    let c = this.getRecordsForResource(resource)
+    if (c.length) return c[0].id
+    else return generate()
   }
 
   createEntityForResource (resource) {
@@ -312,19 +415,46 @@ class ResourceStore extends EventEmitter {
     this.put(record)
   }
 
-  put (record) {
-    console.log('put', record)
-    this.records[record.id] = record
-    const { value } = record
-    if (value.resources) {
-      for (const id of value.resources) {
-        if (!this.recordsByResource[id]) {
-          this.recordsByResource[id] = new Set()
-        }
-        this.recordsByResource[id].add(record.id)
-      }
+  createRecordForResource (schemaName, resource) {
+    const record = {
+      id: this.getEntityIdForResource(resource),
+      schema: schemaName,
+      value: {}
     }
+
+    const schema = this.getSchema(schemaName)
+
+    // TOOD: Derive this from property definitions in the schema.
+    if (schema.properties.resources) {
+      record.value.resources = [resource.id]
+    }
+    if (schema.properties.primaryResource) {
+      record.value.primaryResource = resource.id
+    }
+
+    this.put(record)
+  }
+
+  put (record) {
+    const self = this
+    console.log('put', record)
+    const link = record.link || makeLink(record)
+    this.records[link] = record
+    const { value } = record
+
+    // TOOD: Derive this from property definitions in the schema.
+    if (value.resources) value.resources.forEach(addToResourceIndex)
+    if (value.primaryResource) addToResourceIndex(value.primaryResource)
+    console.log(this.records)
+
     this.emit('update')
+
+    function addToResourceIndex (id) {
+      if (!self.recordsByResource[id]) {
+        self.recordsByResource[id] = new Set()
+      }
+      self.recordsByResource[id].add(link)
+    }
   }
 
   fromFile (file) {
@@ -337,6 +467,16 @@ class ResourceStore extends EventEmitter {
     return this.byFilename[file.name]
   }
 
+  getSchemas () {
+    return [entitySchema, videoSchema]
+  }
+
+  getSchema (id) {
+    const s = this.getSchemas().filter(s => s.$id === id)
+    if (s.length) return s[0]
+    return null
+  }
+
   _createFromFile (file) {
     return {
       files: [file],
@@ -344,4 +484,14 @@ class ResourceStore extends EventEmitter {
       mimetype: 'video/mp4' // todo: derive from filename
     }
   }
+
+  setDraftFiles (draftFiles) {
+    this.draftFiles = draftFiles
+  }
+}
+
+function makeLink (record) {
+  let { id, source, schema } = record
+  source = source || '~'
+  return [source, schema, id].join('$')
 }
