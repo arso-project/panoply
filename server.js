@@ -40,7 +40,7 @@ function makeServer (opts) {
   })
 
   fastify.register(require('./frontend/fastify'), {
-    ssr: false,
+    ssr: false
     // prefix: '/app'
   })
 

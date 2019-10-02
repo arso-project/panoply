@@ -384,4 +384,3 @@ export function Card (props) {
 function schemaName (schema) {
   return schema.split('/')[1]
 }
-

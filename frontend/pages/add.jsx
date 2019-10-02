@@ -35,7 +35,7 @@ const videoSchema = {
   refines: 'arso.xyz/Entity',
   properties: {
     primaryResource: { type: 'relation', description: 'Primary video resource' },
-    derivedResources: { type: 'array', items: { type: 'relation' } },
+    derivedResources: { type: 'array', items: { type: 'relation' } }
   }
 }
 
@@ -276,7 +276,6 @@ function RecordForm (props) {
     />
   )
 }
-
 
 function Entity (props) {
   const { record, onChange } = props
