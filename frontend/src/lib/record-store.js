@@ -1,13 +1,10 @@
-const u = require('url')
-const { Readable, Writable, Transform } = require('stream')
-const duplexify = require('duplexify')
-const queryString = require('query-string')
-const ws = require('websocket-stream')
-const ndjson = require('../../util/ndjson-duplex-stream')
-const { IS_SERVER } = require('./utils.js')
-const L = require('lodash')
-const React = require('react')
-const { useState, useMemo, useRef, useEffect } = require('react')
+import u from 'url'
+import { Readable, Writable, Transform } from 'stream'
+import duplexify from 'duplexify'
+import queryString from 'query-string'
+import ws from 'websocket-stream'
+import ndjson from '../../../util/ndjson-duplex-stream'
+import { IS_SERVER } from './util.js'
 
 class Store {
   constructor () {
@@ -153,78 +150,11 @@ class Store {
 }
 
 const store = new Store()
+
+export default store
+
 if (!IS_SERVER) {
   window.__store__ = store
-}
-
-module.exports = { store, useQuery, useRecord, useCall, makeLink, parseLink }
-
-function useQuery (name, params) {
-  // if (IS_SERVER) return useSSRQuery(name, params)
-  const [results, setResults] = useDebouncedResultState([], 100)
-  useEffect(() => {
-    const onchange = results => setResults(results.slice(0))
-    const unsubscribe = store.query(name, params, onchange)
-    return unsubscribe
-  }, [name, params])
-  return results
-}
-
-function useCall (name, params) {
-  const [result, setResult] = useState()
-  useEffect(() => {
-    const onchange = result => setResult(result && result.length ? result[0] : undefined)
-    const unsubscribe = store.query(name, params, onchange)
-    return unsubscribe
-  }, [name, params])
-  return result
-}
-
-// function useSSRQuery (name, params) {
-//   let promise = store.querySlice(name, params)
-//   let results
-//   promise.then(r => (results = r)).catch(e => (results = []))
-//   setTimeout(() => (results = []), 100)
-//   while (!results) {}
-//   return results
-// }
-
-function useDebouncedResultState (defaultValue, timeout = 30) {
-  const [results, _setResults] = useState(defaultValue)
-  const bouncer = useRef({ bouncer: null, results: null })
-
-  useEffect(() => {
-    return () => clearTimeout(bouncer.current.timeout)
-  }, [])
-
-  function setResults (nextResults) {
-    bouncer.current.results = nextResults
-    if (!bouncer.current.timeout) onTimeout()
-  }
-
-  function onTimeout () {
-    if (bouncer.current.results) {
-      _setResults(bouncer.current.results)
-      bouncer.current.timeout = setTimeout(onTimeout, timeout)
-    } else {
-      bouncer.current.timeout = null
-    }
-    bouncer.current.results = null
-  }
-
-  return [results, setResults]
-}
-
-function useRecord (link) {
-  const [record, setRecord] = useState(null)
-  useEffect(() => {
-    let mount = true
-    store.load(link).then(record => {
-      if (mount) setRecord(record)
-    })
-    return () => (mount = false)
-  })
-  return record
 }
 
 function makePromise () {
@@ -243,7 +173,7 @@ function pushToObject (obj, keys) {
   }
 }
 
-function parseLink (link) {
+export function parseLink (link) {
   if (typeof link === 'object') {
     if (!link.id) throw new Error('Invalid link: no id', link)
     return link
@@ -258,7 +188,7 @@ function parseLink (link) {
   return { id, schema, source }
 }
 
-function makeLink (parts) {
+export function makeLink (parts) {
   if (typeof parts === 'string') return parts
   const { id, schema, source } = parts
   const path = ['.data', schema, id].join('.')

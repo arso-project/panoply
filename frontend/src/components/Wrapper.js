@@ -1,7 +1,7 @@
 const React = require('react')
 const { useRef } = require('react')
-const { Link } = require('./link.jsx')
-const { Cards } = require('./cards.jsx')
+const { Cards } = require('./Cards.js')
+const { Nav } = require('./Nav.js')
 
 module.exports = Wrapper
 
@@ -14,12 +14,7 @@ function Wrapper (props) {
   const { ref, colorChanger } = useColorChanger()
   return (
     <div ref={ref} className={styles.root}>
-      <nav className={styles.nav}>
-        <Link to='/'>Browse</Link>
-        <Link to='/search'>Search</Link>
-        <Link to='/importer'>Importer</Link>
-        <Link to='/add'>Add</Link>
-      </nav>
+      <Nav />
       <main>
         {children}
       </main>

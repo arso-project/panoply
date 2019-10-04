@@ -6,7 +6,7 @@ A progressive web app frontend for panoply with SSR support.
 * Bundled with browserify.
 * Support for server-side rendering through a fastify plugin.
 
-The `build.js` build script creates two bundles: One for server-side rendering (entrypoint `main-ssr.js`) and one for the browser (entrypoint `main-browser.js`). Run `node build.js` to build for production, and `node build.js -w` to build in development mode and watch for changes.
+The `build.js` build script creates two bundles: One for server-side rendering (entrypoint `main-ssr.js`) and one for the browser (entrypoint `main-router.js`). Run `node build.js` to build for production, and `node build.js -w` to build in development mode and watch for changes.
 
 To enable server-side rendering in a fastify app, register `fastify.js` as a fastify plugin.
 

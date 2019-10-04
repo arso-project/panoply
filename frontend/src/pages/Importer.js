@@ -1,15 +1,12 @@
-const React = require('react')
-// const { useMemo, useState, useCallback } = require('react')
-const Wrapper = require('../components/wrapper.jsx')
-const ws = require('websocket-stream')
-const logger = require('../lib/log.js')
+import React from 'react'
+import Wrapper from '../components/Wrapper.js'
+import ws from 'websocket-stream'
+
+import logger from '../lib/log.js'
+import ndjson from '../../../util/ndjson-duplex-stream'
+import { useReadable } from '../hooks'
 
 const log = logger('importer')
-
-const ndjson = require('../../util/ndjson-duplex-stream')
-const { useReadable } = require('../lib/utils')
-
-module.exports = ImporterPage
 
 const CONFIG = {
   baseUrl: 'ws://localhost:9192/'
@@ -23,7 +20,7 @@ function makeClient (config) {
 
 const client = makeClient(CONFIG)
 
-function ImporterPage (props) {
+export default function ImporterPage (props) {
   return (
     <Wrapper>
       <h1>Importer</h1>

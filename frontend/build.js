@@ -9,7 +9,7 @@ const html = require('./html.js')
 
 const argv = minimist(process.argv.slice(2), {
   default: {
-    'server': true
+    server: true
   },
   alias: {
     w: 'watch'
@@ -34,7 +34,7 @@ run({
 })
 
 function run (opts) {
-  const entryBrowser = p.join(__dirname, 'main-browser.js')
+  const entryBrowser = p.join(__dirname, 'src/index.js')
   const browser = makeBrowserify(entryBrowser, {
     tinify: !opts.dev,
     debug: opts.dev,
@@ -42,16 +42,16 @@ function run (opts) {
   })
 
   let server
-  if (opts.server) {
-    let entryServer = p.join(__dirname, 'main-ssr.js')
-    server = makeBrowserify(entryServer, {
-      bare: true,
-      node: true,
-      bundleExternal: false,
-      standalone: 'panoply.frontend',
-      tinify: false
-    })
-  }
+  // if (opts.server) {
+  //   let entryServer = p.join(__dirname, 'main-ssr.js')
+  //   server = makeBrowserify(entryServer, {
+  //     bare: true,
+  //     node: true,
+  //     bundleExternal: false,
+  //     standalone: 'panoply.frontend',
+  //     tinify: false
+  //   })
+  // }
 
   if (opts.watch) {
     browser.plugin(require('watchify'))

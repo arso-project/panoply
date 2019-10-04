@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import Wrapper from '../components/wrapper.jsx'
-import { generate } from '../../lib/id'
-import styles from './add.css'
 import { EventEmitter } from 'events'
-import { RecordCard, Card, Meta } from '../components/list.jsx'
-import { useUpdate } from '../lib/utils'
-import cn from 'classnames'
 import { Readable } from 'stream'
+import cn from 'classnames'
+
+import { generate } from '../../../lib/id'
+import { useUpdate } from '../hooks'
+
+import Wrapper from '../components/Wrapper.js'
+import { RecordCard, Card, Meta } from '../components/List.js'
+
+import styles from './add.css'
 
 // GLOBALS (have to move)
 
@@ -18,7 +21,10 @@ const entitySchema = {
       type: 'string',
       description: 'Label'
     },
-    description: { type: 'string', description: 'Description' },
+    description: {
+      type: 'string',
+      description: 'Description'
+    },
     resources: {
       type: 'array',
       description: 'Resource',

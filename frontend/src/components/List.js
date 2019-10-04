@@ -1,13 +1,11 @@
+import React, { useMemo, useEffect, useState, useCallback, useRef } from 'react'
+import cn from 'classnames'
 
-const React = require('react')
-const { useMemo, useEffect, useState, useCallback, useRef } = require('react')
+import { useDebouncedState } from '../hooks'
 
-const { useDebouncedState, IS_SERVER } = require('../lib/utils.js')
-const { Link } = require('./../components/link.jsx')
-const { makeLink } = require('../lib/records.js')
+import { Link } from './Link.js'
 
-const cn = require('classnames')
-const styles = require('./list.css')
+import styles from './list.css'
 
 export function GroupedList (props) {
   const { list } = props

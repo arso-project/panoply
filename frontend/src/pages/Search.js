@@ -1,15 +1,14 @@
-const React = require('react')
-const { useMemo, useEffect, useState, useCallback, useRef } = require('react')
-const { useQuery, useCall } = require('../lib/records.js')
-const Wrapper = require('../components/wrapper.jsx')
+import React, { useMemo, useEffect, useState, useCallback, useRef } from 'react'
+import cn from 'classnames'
 
-const { Link } = require('../components/link.jsx')
-const { List } = require('../components/list.jsx')
-const { makeLink } = require('../lib/records.js')
+import { useQuery, useCall } from '../hooks/records.js'
+import { makeLink } from '../lib/record-store.js'
 
-const cn = require('classnames')
+import Wrapper from '../components/Wrapper.js'
+import { Link } from '../components/Link.js'
+import { List } from '../components/List.js'
 
-const styles = require('./search.css')
+import styles from './search.css'
 
 module.exports = Page
 

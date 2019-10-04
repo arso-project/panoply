@@ -1,11 +1,13 @@
 const React = require('react')
-const { useMemo, useState, useCallback } = require('react')
-const Wrapper = require('../components/wrapper.jsx')
-const styles = require('./id.css')
-const { useQuery } = require('../lib/records.js')
+const { useMemo } = require('react')
+const { useQuery } = require('../hooks/records.js')
 const L = require('lodash')
 
-const { List, RecordSetCard } = require('../components/list.jsx')
+const Wrapper = require('../components/Wrapper.js')
+const { List, RecordSetCard } = require('../components/List.js')
+
+const styles = require('./id.css')
+
 module.exports = IdPage
 
 function IdPage (props) {

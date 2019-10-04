@@ -1,5 +1,6 @@
-const router = require('./lib/router/ssr')
+// const router = require('./lib/router/ssr')
 const p = require('path')
+const html = require('./html')
 
 module.exports = async function (fastify, opts) {
   fastify.register(require('fastify-static'), {
@@ -8,16 +9,24 @@ module.exports = async function (fastify, opts) {
     decorateReply: false
   })
 
-  let routes
-  if (opts.ssr) {
-    routes = require('./dist/ssr/main.js')
-  } else {
-    routes = [{
-      path: '/*',
-      exact: false,
-      ssr: false
-    }]
-  }
+  fastify.get('/*', async (request, reply) => {
+    const htmlString = html({
+      prefix: opts.prefix
+    })
+    reply.type('text/html')
+    reply.send(htmlString)
+  })
 
-  return router(routes)(fastify, opts)
+  // let routes
+  // if (opts.ssr) {
+  //   routes = require('./dist/ssr/main.js')
+  // } else {
+  //   routes = [{
+  //     path: '/*',
+  //     exact: false,
+  //     ssr: false
+  //   }]
+  // }
+
+  // return router(routes)(fastify, opts)
 }
