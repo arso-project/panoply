@@ -4,3 +4,4 @@ package-lock.json
 data
 frontend/dist
 report.*
+.idea

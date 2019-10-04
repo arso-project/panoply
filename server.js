@@ -99,15 +99,16 @@ function makeServer (opts) {
   })
 
   fastify.get('/query/:name', { websocket: true }, (rawStream, req, params) => {
+    console.log('QUERY RECV')
     const stream = ndjson(rawStream)
 
     const { name } = params
     const args = queryArgs(req.url)
 
     const time = clock()
-    log.info('query: %s %o', name, args)
+    log.info('[query] %s START %o', name, args)
 
-    const [ view, method ] = name.split('.')
+    const [view, method] = name.split('.')
 
     if (!(typeof store.api[view] === 'object' &&
         typeof store.api[view][method] === 'function')) {
@@ -134,16 +135,21 @@ function makeServer (opts) {
         transforms.push(store.createGetStream())
       }
 
+      log.info('[query] %s STREAM %s', name, time())
+      stream.on('end', () => log.info('[query] %s END'))
+
       transforms.push(collectStream(100))
       pump(result, ...transforms, stream)
     } else if (manifest.type === 'promise') {
       result
         .then(data => {
+          log.info('[query] %s DONE %s', name, time())
           stream.write(data)
           stream.end()
         })
         .catch(err => stream.destroy(err))
     } else {
+      log.info('[query] %s ERROR')
       stream.destroy(new Error('Unsupported method: ' + name))
     }
 

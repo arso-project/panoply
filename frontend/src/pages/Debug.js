@@ -1,7 +1,6 @@
-const React = require('react')
-const Wrapper = require('../components/Wrapper.js')
-
-const { MaterialTest } = require('./material-test.jsx')
+import React from 'react'
+import Wrapper from '../components/Wrapper.js'
+// import { MaterialTest } from './material-test.jsx'
 
 module.exports = DebugPage
 
@@ -12,7 +11,7 @@ function DebugPage (props) {
       <h1>
         Debug
       </h1>
-      <MaterialTest />
+      {/* <MaterialTest /> */}
     </Wrapper>
   )
 }

@@ -16,9 +16,12 @@ export function useQuery (name, params) {
 export function useCall (name, params) {
   const [result, setResult] = useState()
   useEffect(() => {
-    const onchange = result => setResult(result && result.length ? result[0] : undefined)
     const unsubscribe = store.query(name, params, onchange)
     return unsubscribe
+
+    function onchange (result) {
+      setResult(result && result.length ? result[0] : undefined)
+    }
   }, [name, params])
   return result
 }

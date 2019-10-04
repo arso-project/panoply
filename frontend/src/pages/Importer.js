@@ -8,17 +8,17 @@ import { useReadable } from '../hooks'
 
 const log = logger('importer')
 
-const CONFIG = {
-  baseUrl: 'ws://localhost:9192/'
-}
+// const CONFIG = {
+//   baseUrl: 'ws://localhost:9192/'
+// }
 
-function makeClient (config) {
-  const client = ndjson(ws(config.baseUrl + '/api'))
-  client.on('error', err => log.error('Importer error', err))
-  return client
-}
+// function makeClient (config) {
+//   const client = ndjson(ws(config.baseUrl + '/api'))
+//   client.on('error', err => log.error('Importer error', err))
+//   return client
+// }
 
-const client = makeClient(CONFIG)
+// const client = makeClient(CONFIG)
 
 export default function ImporterPage (props) {
   return (

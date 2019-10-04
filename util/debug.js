@@ -6,11 +6,11 @@ function clock () {
   const [ss, sn] = process.hrtime()
   return () => {
     const [ds, dn] = process.hrtime([ss, sn])
-    let ns = (ds * 1e9) + dn
-    let ms = Math.round(ns / 1e6, 2)
-    let s = ms / 1000
-    if (s > 1) return s + 's'
-    if (ms) return ms + 'ms'
+    const ns = (ds * 1e9) + dn
+    const ms = round(ns / 1e6)
+    const s = round(ms / 1e3)
+    if (s >= 1) return s + 's'
+    if (ms >= 0.01) return ms + 'ms'
     if (ns) return ns + 'ns'
   }
 }
@@ -34,4 +34,8 @@ function logEvents (emitter, name) {
     log.debug('(%s) %s', name, args[0], params)
     emit.apply(emitter, args)
   }
+}
+
+function round (num, decimals = 2) {
+  return Math.round(num * Math.pow(10, decimals)) / Math.pow(10, decimals)
 }

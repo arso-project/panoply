@@ -4,7 +4,10 @@ import duplexify from 'duplexify'
 import queryString from 'query-string'
 import ws from 'websocket-stream'
 import ndjson from '../../../util/ndjson-duplex-stream'
+import logger from './log'
 import { IS_SERVER } from './util.js'
+
+const log = logger('record-store')
 
 class Store {
   constructor () {
@@ -74,7 +77,7 @@ class Store {
     const [promise, resolve] = makePromise()
     const onchange = results => {
       if (results.length > offset + count) {
-        let slice = results.slice(offset, offset + count)
+        const slice = results.slice(offset, offset + count)
         query.unsubscribe(onchange)
         resolve(slice.map(l => this.get(l)))
       }
@@ -101,7 +104,10 @@ class Store {
       subscribers.delete(fn)
     }
 
+    log.info('query %s: start', name)
     const stream = openStream('/query/' + path)
+    log.info('query %s: stream established', name, stream)
+
     // const transform = new Transform({
     //   objectMode: true,
     //   transform (chunk, encoding, next) {
@@ -114,7 +120,8 @@ class Store {
 
     stream.on('data', (chunk) => {
       if (!Array.isArray(chunk)) chunk = [chunk]
-      for (let record of chunk) {
+      log.info('query %s: data', name, chunk)
+      for (const record of chunk) {
         const link = this.put(record)
         results.push(link)
       }
@@ -202,5 +209,10 @@ const baseUrl = IS_SERVER
 function openStream (path) {
   const websocket = ws(baseUrl + path)
   const stream = ndjson(websocket)
+  // const emit = websocket.emit
+  // websocket.emit = (...args) => {
+  //   log.info('stream emit %s', ...args)
+  //   emit.apply(websocket, args)
+  // }
   return stream
 }

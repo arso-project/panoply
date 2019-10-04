@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "node ./frontend/build.js -w",
-    "build": "node ./frontend/build.js",
+    "build": "NODE_ENV=production node ./frontend/build.js",
     "start": "node server.js | pino-pretty -c -t HH:MM:ss.l -i pid,hostname",
     "start2": "node server.js -p 9192 -s ./data2 | pino-pretty -c -t HH:MM:ss.l -i pid,hostname"
   },

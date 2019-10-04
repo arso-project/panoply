@@ -15,7 +15,6 @@ const argv = minimist(process.argv.slice(2), {
     w: 'watch'
   }
 })
-console.log(argv)
 
 const BUILD_PATH = p.join(__dirname, 'dist')
 
@@ -24,13 +23,13 @@ const BUILD_PATHS = {
   ssr: p.join(BUILD_PATH, 'ssr')
 }
 
-for (let path of Object.values(BUILD_PATHS)) {
+for (const path of Object.values(BUILD_PATHS)) {
   mkdirp.sync(path)
 }
 
 run({
   watch: argv.watch,
-  dev: true
+  dev: !(process.env.NODE_ENV === 'production')
 })
 
 function run (opts) {
